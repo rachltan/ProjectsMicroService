@@ -1,4 +1,4 @@
-# app.py — Projects Microservice (no JWT required)
+# app.py — Projects Microservice
 
 import os
 from flask import Flask, request, jsonify
@@ -15,11 +15,12 @@ def create_app() -> Flask:
     # CORS
     CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=False)
 
-    # ===== Mongo Projects DB init (host/port mode) =====
+    # ===== MongoDB initialization =====
     project_db = ProjectDB(
+        db_name=app.config.get("MONGO_DB", "projects_db"),
+        uri=app.config.get("MONGO_URI"),   # Atlas / cloud connection
         host=app.config.get("MONGO_HOST", "localhost"),
         port=app.config.get("MONGO_PORT", 27017),
-        db_name=app.config.get("MONGO_DB", "projects_db"),
         username=app.config.get("MONGO_INITDB_ROOT_USERNAME"),
         password=app.config.get("MONGO_INITDB_ROOT_PASSWORD"),
         auth_source=app.config.get("MONGO_AUTHSOURCE", "admin"),
@@ -30,34 +31,22 @@ def create_app() -> Flask:
     def health():
         return jsonify({"status": "ok", "service": "projects"}), 200
 
-    # ============== PROJECTS API (NO AUTH REQUIRED FOR NOW) ==============
+    # ============== PROJECT CRUD API ==============
 
     @app.post("/projects")
     def create_project():
-        """
-        Create a new project.
-        Expected JSON:
-        {
-          "project_id": "P1",
-          "project_name": "My Project",
-          "project_desc": "description",
-          "members_list": ["user1", "user2"],
-          "num_of_hardware_sets": 2,
-          "hardware_set_id": ["HW1", "HW2"]
-        }
-        """
         data = request.get_json(force=True) or {}
 
-        # Basic validation
         project_id = (data.get("project_id") or "").strip()
         project_name = (data.get("project_name") or "").strip()
+
         if not project_id or not project_name:
             return jsonify({
                 "success": False,
                 "message": "project_id and project_name are required"
             }), 400
 
-        # If members_list is missing, make it a list
+        # Default members_list
         data.setdefault("members_list", [])
 
         project_obj = Project.from_dict(data)
@@ -79,7 +68,6 @@ def create_app() -> Flask:
     @app.put("/projects/<project_id>")
     def update_project(project_id: str):
         updates = request.get_json(force=True) or {}
-        # do not allow changing project_id through updates
         updates.pop("project_id", None)
 
         updated = project_db.update_project(project_id, updates)
@@ -97,6 +85,7 @@ def create_app() -> Flask:
     return app
 
 
+# Only used locally (Heroku uses gunicorn)
 if __name__ == "__main__":
     app = create_app()
     port = int(os.getenv("PORT", "5003"))

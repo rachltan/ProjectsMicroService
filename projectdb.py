@@ -1,27 +1,44 @@
+# projectdb.py
 from typing import Optional, Dict, Any, List
 from pymongo import MongoClient
 
+
 class ProjectDB:
-    def __init__(self, host: str, port: int, db_name: str,
-                 username: Optional[str] = None,
-                 password: Optional[str] = None,
-                 auth_source: str = "admin"):
-        # Connect the same way the user microservice did, but to a 'projects' DB
-        if username and password:
-            self.client = MongoClient(
-                host=host,
-                port=port,
-                username=username,
-                password=password,
-                authSource=auth_source
-            )
+    def __init__(
+        self,
+        db_name: str,
+        uri: Optional[str] = None,
+        host: str = "localhost",
+        port: int = 27017,
+        username: Optional[str] = None,
+        password: Optional[str] = None,
+        auth_source: str = "admin",
+    ):
+        """
+        If a MongoDB URI is provided → connect using the URI (Atlas/Heroku).
+        Otherwise fallback to host/port local connection.
+        """
+
+        if uri:
+            # Atlas / cloud-based connection
+            self.client = MongoClient(uri)
         else:
-            self.client = MongoClient(host=host, port=port)
+            # Local (Docker or localhost) connection
+            if username and password:
+                self.client = MongoClient(
+                    host=host,
+                    port=port,
+                    username=username,
+                    password=password,
+                    authSource=auth_source,
+                )
+            else:
+                self.client = MongoClient(host=host, port=port)
 
         self.db = self.client[db_name]
         self.projects = self.db["projects"]
 
-    # ---- helper to convert _id to string ----
+    # ---- convert ObjectId to string ----
     @staticmethod
     def _normalize(doc: Dict[str, Any]) -> Dict[str, Any]:
         if not doc:
@@ -31,7 +48,6 @@ class ProjectDB:
         return doc
 
     def create_project(self, project_data: Dict[str, Any]) -> Dict[str, Any]:
-        # project_data should already be a dict (e.g., Project(...).to_dict())
         res = self.projects.insert_one(project_data)
         created = self.projects.find_one({"_id": res.inserted_id})
         return self._normalize(created)
