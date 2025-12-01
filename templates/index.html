@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>User Authentication</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{
+    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background:white;min-height:100vh;display:flex;
+    justify-content:center;align-items:center;padding:20px
+  }
+  .container{
+    background:white;padding:40px;border-radius:16px;
+    box-shadow:0 20px 60px rgba(0,0,0,0.3);
+    width:100%;max-width:400px
+  }
+  h1{text-align:center;color:#333;margin-bottom:30px;font-size:28px}
+  .form-group{margin-bottom:20px}
+  label{display:block;margin-bottom:8px;color:#555;font-weight:500}
+  input{
+    width:100%;padding:12px;border:2px solid #e0e0e0;
+    border-radius:8px;font-size:16px;transition:border-color .3s
+  }
+  input:focus{outline:none;border-color:#667eea}
+  button{
+    width:100%;padding:14px;
+    background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+    color:white;border:none;border-radius:8px;
+    font-size:16px;font-weight:600;cursor:pointer;
+    transition:transform .2s;margin-top:10px
+  }
+  button:hover{transform:translateY(-2px)}
+  button:active{transform:translateY(0)}
+  .toggle-link{text-align:center;margin-top:20px;color:#666}
+  .toggle-link a{color:#667eea;text-decoration:none;font-weight:600}
+  .toggle-link a:hover{text-decoration:underline}
+  .message{
+    padding:12px;border-radius:8px;margin-bottom:20px;
+    text-align:center;display:none
+  }
+  .message.success{
+    background:#d4edda;color:#155724;border:1px solid #c3e6cb
+  }
+  .message.error{
+    background:#f8d7da;color:#721c24;border:1px solid #f5c6cb
+  }
+  .hidden{display:none}
+  .dashboard{text-align:center}
+  .dashboard h2{color:#333;margin-bottom:20px}
+  .user-info{
+    background:#f8f9fa;padding:20px;border-radius:8px;
+    margin-bottom:20px
+  }
+  .user-info p{color:#555;margin:10px 0}
+  #logoutBtn{background:#4f9cff}
+  #logoutBtn:hover{background:#1b4b9c}
+
+  /* === TOGGLE / TABS STYLE === */
+  .tab-toggle-wrapper{
+    display:flex;
+    justify-content:space-between;
+    gap:10px;
+    margin-bottom:15px;
+  }
+  .tab-toggle{
+    flex:1;
+    padding:10px 12px;
+    border-radius:999px;
+    border:1px solid #d0d4ff;
+    background:#f1f3ff;
+    font-size:14px;
+    font-weight:600;
+    cursor:pointer;
+    text-align:center;
+    text-decoration:none;
+    color:#333;
+    transition:background .15s, transform .15s;
+  }
+  .tab-toggle:hover{
+    background:#dfe3ff;
+    transform:translateY(-1px);
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+    <div id="message" class="message"></div>
+
+    <!-- AUTH SECTION (before login) -->
+    <div id="authSection">
+      <h1 id="formTitle">Login</h1>
+      <form id="authForm">
+        <div class="form-group">
+          <label for="username">Username</label>
+          <input id="username" name="username" required/>
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input id="password" name="password" type="password" required/>
+        </div>
+        <button id="submitBtn" type="submit">Login</button>
+      </form>
+      <div class="toggle-link">
+        <span id="toggleText">Don't have an account?</span>
+        <a href="#" id="toggleLink">Sign Up</a>
+      </div>
+    </div>
+
+    <!-- DASHBOARD SECTION (AFTER LOGIN) -->
+    <div id="dashboardSection" class="hidden">
+      <div class="dashboard">
+        <h2>Welcome!</h2>
+        <div class="user-info">
+          <p><strong>Username:</strong> <span id="displayUsername"></span></p>
+          <p><strong>Status:</strong> Logged In</p>
+        </div>
+
+        <!-- 🔥 HERE ARE YOUR TWO TOGGLES -->
+        <div class="tab-toggle-wrapper">
+          <a class="tab-toggle" href="/hardware">Hardware</a>
+          <a class="tab-toggle" href="/top10companies">Top 10 Companies</a>
+        </div>
+
+        <button id="logoutBtn">Logout</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+  let isLoginMode = true;
+  const authForm = document.getElementById('authForm');
+  const toggleLink = document.getElementById('toggleLink');
+  const formTitle = document.getElementById('formTitle');
+  const submitBtn = document.getElementById('submitBtn');
+  const toggleText = document.getElementById('toggleText');
+  const messageDiv = document.getElementById('message');
+
+  // On page load: validate token with /me
+  window.addEventListener('DOMContentLoaded', async () => {
+    const token = localStorage.getItem('access_token');
+    const username = localStorage.getItem('username');
+    if (!token || !username) {
+      showAuthSection();
+      return;
+    }
+    try {
+      const r = await fetch('/me', {
+        headers: { 'Authorization': 'Bearer ' + token }
+      });
+      if (r.ok) {
+        showDashboard(username);
+      } else {
+        localStorage.clear();
+        showAuthSection();
+      }
+    } catch (_) {
+      localStorage.clear();
+      showAuthSection();
+    }
+  });
+
+  toggleLink.addEventListener('click', (e) => {
+    e.preventDefault();
+    isLoginMode = !isLoginMode;
+    if (isLoginMode) {
+      formTitle.textContent = 'Login';
+      submitBtn.textContent = 'Login';
+      toggleText.textContent = "Don't have an account?";
+      toggleLink.textContent = 'Sign Up';
+    } else {
+      formTitle.textContent = 'Sign Up';
+      submitBtn.textContent = 'Create Account';
+      toggleText.textContent = 'Already have an account?';
+      toggleLink.textContent = 'Login';
+    }
+    hideMessage();
+  });
+
+  authForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const username = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value;
+    const endpoint = isLoginMode ? '/logIn' : '/createAccount';
+
+    try {
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ Username: username, pswd: password })
+      });
+      const data = await response.json();
+      if (data.success) {
+        showMessage(data.message || 'Success', 'success');
+        localStorage.setItem('access_token', data.access_token);
+        localStorage.setItem('username', data.user.username);
+        setTimeout(() => showDashboard(data.user.username), 400);
+      } else {
+        showMessage(data.message || 'Failed', 'error');
+      }
+    } catch {
+      showMessage('Connection error. Please try again.', 'error');
+    }
+  });
+
+  document.getElementById('logoutBtn').addEventListener('click', async () => {
+    const token = localStorage.getItem('access_token');
+    try {
+      await fetch('/logOut', {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer ' + token,
+          'Content-Type': 'application/json'
+        }
+      });
+    } catch {}
+    localStorage.clear();
+    showAuthSection();
+    showMessage('Logged out successfully', 'success');
+  });
+
+  function showMessage(text, type) {
+    messageDiv.textContent = text;
+    messageDiv.className = 'message ' + type;
+    messageDiv.style.display = 'block';
+  }
+  function hideMessage(){ messageDiv.style.display = 'none'; }
+
+  function showDashboard(username){
+    document.getElementById('authSection').classList.add('hidden');
+    document.getElementById('dashboardSection').classList.remove('hidden');
+    document.getElementById('displayUsername').textContent = username;
+    hideMessage();
+  }
+
+  function showAuthSection(){
+    document.getElementById('dashboardSection').classList.add('hidden');
+    document.getElementById('authSection').classList.remove('hidden');
+    document.getElementById('username').value = '';
+    document.getElementById('password').value = '';
+  }
+</script>
+</body>
+</html>
