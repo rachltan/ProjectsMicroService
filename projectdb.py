@@ -1,29 +1,27 @@
-# projectdb.py
 from typing import Optional, Dict, Any, List
 from pymongo import MongoClient
-
+from flask import current_app
 
 class ProjectDB:
-    def __init__(
-        self,
-        db_name: str,
-        uri: Optional[str] = None,
-        host: str = "localhost",
-        port: int = 27017,
-        username: Optional[str] = None,
-        password: Optional[str] = None,
-        auth_source: str = "admin",
-    ):
+    def __init__(self,
+                 host: str,
+                 port: int,
+                 db_name: str,
+                 username: Optional[str] = None,
+                 password: Optional[str] = None,
+                 auth_source: str = "admin"):
         """
-        If a MongoDB URI is provided → connect using the URI (Atlas/Heroku).
-        Otherwise fallback to host/port local connection.
+        If MONGO_URI is set in config, use that.
+        Otherwise, fall back to host/port auth (for local Docker).
         """
+        uri = current_app.config.get("MONGO_URI")
 
         if uri:
-            # Atlas / cloud-based connection
+            # Atlas / Heroku mode
             self.client = MongoClient(uri)
+            self.db = self.client[current_app.config.get("MONGO_DB", db_name)]
         else:
-            # Local (Docker or localhost) connection
+            # Local mode
             if username and password:
                 self.client = MongoClient(
                     host=host,
@@ -34,11 +32,10 @@ class ProjectDB:
                 )
             else:
                 self.client = MongoClient(host=host, port=port)
+            self.db = self.client[db_name]
 
-        self.db = self.client[db_name]
         self.projects = self.db["projects"]
 
-    # ---- convert ObjectId to string ----
     @staticmethod
     def _normalize(doc: Dict[str, Any]) -> Dict[str, Any]:
         if not doc:
