@@ -31,6 +31,13 @@ def create_app() -> Flask:
     def health():
         return jsonify({"status": "ok", "service": "projects"}), 200
 
+    @app.get("/")
+    def root():
+        return jsonify({
+            "message": "Projects microservice is running",
+            "endpoints": ["/health", "/projects"]
+        }), 200
+
     # ============== PROJECT CRUD API ==============
 
     @app.post("/projects")
