@@ -1,432 +1,244 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<title>Projects Dashboard</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<style>
-  * { margin:0; padding:0; box-sizing:border-box; }
-  body {
-    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background:#f5f5f5;
-    min-height:100vh;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    padding:20px;
-  }
-  .container {
-    background:white;
-    padding:32px 28px;
-    border-radius:16px;
-    box-shadow:0 20px 60px rgba(0,0,0,0.25);
-    width:100%;
-    max-width:900px;
-  }
-  h1 {
-    text-align:left;
-    color:#333;
-    margin-bottom:8px;
-    font-size:26px;
-  }
-  .subtitle {
-    color:#666;
-    font-size:14px;
-    margin-bottom:24px;
-  }
-  .message {
-    padding:10px 12px;
-    border-radius:8px;
-    margin-bottom:16px;
-    text-align:left;
-    display:none;
-    font-size:14px;
-  }
-  .message.success {
-    background:#d4edda;
-    color:#155724;
-    border:1px solid #c3e6cb;
-  }
-  .message.error {
-    background:#f8d7da;
-    color:#721c24;
-    border:1px solid #f5c6cb;
-  }
-
-  .layout {
-    display:flex;
-    gap:24px;
-    flex-wrap:wrap;
-  }
-  .left, .right {
-    flex:1 1 300px;
-  }
-
-  /* Form styles */
-  .card {
-    background:#fafafa;
-    border-radius:12px;
-    padding:18px 16px;
-    border:1px solid #e4e4e4;
-  }
-  .card h2 {
-    font-size:18px;
-    margin-bottom:12px;
-    color:#333;
-  }
-  .form-group {
-    margin-bottom:12px;
-  }
-  label {
-    display:block;
-    margin-bottom:6px;
-    color:#555;
-    font-weight:500;
-    font-size:14px;
-  }
-  input, textarea {
-    width:100%;
-    padding:10px;
-    border:2px solid #e0e0e0;
-    border-radius:8px;
-    font-size:14px;
-    transition:border-color .2s;
-    font-family:inherit;
-  }
-  input:focus, textarea:focus {
-    outline:none;
-    border-color:#667eea;
-  }
-  textarea {
-    min-height:60px;
-    resize:vertical;
-  }
-  button {
-    padding:10px 16px;
-    background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
-    color:white;
-    border:none;
-    border-radius:8px;
-    font-size:14px;
-    font-weight:600;
-    cursor:pointer;
-    transition:transform .15s, box-shadow .15s;
-  }
-  button:hover {
-    transform:translateY(-1px);
-    box-shadow:0 4px 10px rgba(0,0,0,0.15);
-  }
-  button:active {
-    transform:translateY(0);
-    box-shadow:none;
-  }
-
-  /* Projects table */
-  table {
-    width:100%;
-    border-collapse:collapse;
-    font-size:13px;
-    margin-top:4px;
-    border-radius:10px;
-    overflow:hidden;
-  }
-  thead {
-    background:#f3f4ff;
-  }
-  th, td {
-    padding:9px 10px;
-    text-align:left;
-  }
-  th {
-    font-size:11px;
-    text-transform:uppercase;
-    letter-spacing:0.06em;
-    color:#7a7fa0;
-    border-bottom:1px solid #e0e3f0;
-  }
-  tbody tr:nth-child(even) {
-    background:#fafbff;
-  }
-  tbody tr:hover {
-    background:#eef2ff;
-  }
-  .tag {
-    display:inline-block;
-    padding:2px 8px;
-    border-radius:999px;
-    background:#e5f3ff;
-    color:#25548f;
-    font-size:11px;
-    margin-right:4px;
-  }
-  .badge {
-    display:inline-flex;
-    padding:3px 10px;
-    border-radius:999px;
-    background:#e3ebff;
-    color:#3955d3;
-    font-size:11px;
-    font-weight:600;
-    letter-spacing:0.04em;
-    text-transform:uppercase;
-    margin-bottom:8px;
-  }
-  .status-bar {
-    font-size:12px;
-    margin-top:6px;
-    color:#888;
-  }
-  .status-bar.loading {
-    color:#5b6ff6;
-  }
-  .status-bar.error {
-    color:#b3261e;
-  }
-
-  .footer-links {
-    margin-top:16px;
-    font-size:12px;
-    color:#888;
-    display:flex;
-    justify-content:space-between;
-    flex-wrap:wrap;
-    gap:8px;
-  }
-  .footer-links a {
-    color:#667eea;
-    text-decoration:none;
-    font-weight:500;
-  }
-  .footer-links a:hover {
-    text-decoration:underline;
-  }
-</style>
+  <meta charset="UTF-8">
+  <title>Projects Dashboard</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #ffffff;
+      margin: 0;
+      padding: 24px;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    h1 {
+      font-size: 28px;
+      margin-bottom: 24px;
+    }
+    h2 {
+      font-size: 22px;
+      margin-bottom: 12px;
+    }
+    .panel {
+      border: 1px solid #ddd;
+      padding: 16px 18px 20px;
+      margin-bottom: 24px;
+    }
+    .form-row {
+      margin-bottom: 10px;
+    }
+    input, textarea {
+      width: 260px;
+      padding: 6px 8px;
+      font-size: 14px;
+      border: 1px solid #aaa;
+      border-radius: 2px;
+      box-sizing: border-box;
+    }
+    textarea {
+      height: 60px;
+      resize: vertical;
+    }
+    button {
+      padding: 6px 12px;
+      font-size: 14px;
+      border-radius: 2px;
+      border: 1px solid #444;
+      background: #f8f8f8;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #eaeaea;
+    }
+    .message {
+      margin-top: 8px;
+      font-size: 14px;
+    }
+    .message.error {
+      color: #b3261e;
+    }
+    .message.success {
+      color: #1b5e20;
+    }
+    .project-details {
+      margin-top: 14px;
+      font-size: 15px;
+    }
+    .project-details p {
+      margin: 4px 0;
+    }
+  </style>
 </head>
 <body>
   <div class="container">
-    <div class="badge">Projects Microservice</div>
-    <h1>Projects Dashboard</h1>
-    <p class="subtitle">
-      View and manage project records stored in the MongoDB <strong>projects_db</strong> backend.
-      This UI talks directly to the <code>/projects</code> API exposed by your microservice.
-    </p>
+    <h1>Projects</h1>
 
-    <div id="message" class="message"></div>
+    <!-- ============= CREATE NEW PROJECT ============= -->
+    <div class="panel">
+      <h2>Create New Project</h2>
 
-    <div class="layout">
-      <!-- LEFT: CREATE PROJECT -->
-      <div class="left">
-        <div class="card">
-          <h2>Create New Project</h2>
-          <form id="createProjectForm">
-            <div class="form-group">
-              <label for="projectId">Project ID</label>
-              <input id="projectId" name="projectId" placeholder="e.g. P3" required />
-            </div>
-            <div class="form-group">
-              <label for="projectName">Project Name</label>
-              <input id="projectName" name="projectName" placeholder="e.g. Heroku Demo Project" required />
-            </div>
-            <div class="form-group">
-              <label for="projectDesc">Description</label>
-              <textarea id="projectDesc" name="projectDesc" placeholder="Short description"></textarea>
-            </div>
-            <div class="form-group">
-              <label for="membersList">Members (comma-separated)</label>
-              <input id="membersList" name="membersList" placeholder="rachel, alex, ..." />
-            </div>
-            <div class="form-group">
-              <label for="numHardwareSets">Number of Hardware Sets</label>
-              <input id="numHardwareSets" name="numHardwareSets" type="number" min="0" value="1" />
-            </div>
-            <div class="form-group">
-              <label for="hardwareSetId">Hardware Set IDs (comma-separated)</label>
-              <input id="hardwareSetId" name="hardwareSetId" placeholder="HW1, HW2" />
-            </div>
-            <button type="submit">Create Project</button>
-          </form>
-        </div>
+      <div class="form-row">
+        <input id="newProjectId" placeholder="Project ID">
+      </div>
+      <div class="form-row">
+        <input id="newProjectName" placeholder="Project Name">
+      </div>
+      <div class="form-row">
+        <textarea id="newProjectDesc" placeholder="Description"></textarea>
+      </div>
+      <div class="form-row">
+        <input id="newMembers" placeholder="Members (comma separated)">
+      </div>
+      <div class="form-row">
+        <input id="newHardwareIds" placeholder="Hardware Set IDs (comma separated)">
+      </div>
+      <div class="form-row">
+        <input id="newNumHardware" placeholder="# Hardware Sets Checked Out" type="number" min="0">
       </div>
 
-      <!-- RIGHT: PROJECTS TABLE -->
-      <div class="right">
-        <div class="card">
-          <h2>Existing Projects</h2>
-          <table>
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Name / Description</th>
-                <th>Members</th>
-                <th>Hardware</th>
-              </tr>
-            </thead>
-            <tbody id="projectsBody">
-              <!-- rows injected by JS -->
-            </tbody>
-          </table>
-          <div id="statusBar" class="status-bar"></div>
-        </div>
-      </div>
+      <button id="createBtn">Create</button>
+
+      <div id="createMessage" class="message"></div>
     </div>
 
-    <div class="footer-links">
-      <span>Deployed at: <code id="hostSpan"></code></span>
-      <a href="/health" target="_blank">Health check → /health</a>
+    <!-- ============= EXISTING PROJECT ============= -->
+    <div class="panel">
+      <h2>Existing Project</h2>
+
+      <div class="form-row">
+        <input id="existingProjectId" placeholder="Project ID">
+      </div>
+
+      <button id="accessBtn">Access Project</button>
+
+      <div id="accessMessage" class="message"></div>
+
+      <div id="projectDetails" class="project-details" style="display:none;">
+        <p><strong>Project Name:</strong> <span id="detailName"></span></p>
+        <p><strong>Description:</strong> <span id="detailDesc"></span></p>
+        <p><strong>Hardware Sets:</strong> <span id="detailHardware"></span></p>
+        <p><strong>Checked Out:</strong> <span id="detailChecked"></span></p>
+      </div>
     </div>
   </div>
 
-<script>
-  const messageDiv = document.getElementById('message');
-  const projectsBody = document.getElementById('projectsBody');
-  const statusBar = document.getElementById('statusBar');
-  const hostSpan = document.getElementById('hostSpan');
+  <script>
+    const createBtn = document.getElementById('createBtn');
+    const accessBtn = document.getElementById('accessBtn');
 
-  hostSpan.textContent = window.location.origin;
+    const createMessage = document.getElementById('createMessage');
+    const accessMessage = document.getElementById('accessMessage');
 
-  function showMessage(text, type) {
-    messageDiv.textContent = text;
-    messageDiv.className = 'message ' + type;
-    messageDiv.style.display = 'block';
-  }
-  function hideMessage() {
-    messageDiv.style.display = 'none';
-  }
+    const detailBox = document.getElementById('projectDetails');
+    const detailName = document.getElementById('detailName');
+    const detailDesc = document.getElementById('detailDesc');
+    const detailHardware = document.getElementById('detailHardware');
+    const detailChecked = document.getElementById('detailChecked');
 
-  function renderProjects(projects) {
-    projectsBody.innerHTML = '';
-
-    if (!projects || projects.length === 0) {
-      const tr = document.createElement('tr');
-      tr.innerHTML =
-        '<td colspan="4" style="text-align:center;padding:16px;color:#888;">No projects found. Create one on the left.</td>';
-      projectsBody.appendChild(tr);
-      return;
+    function setMessage(el, text, isError = false) {
+      el.textContent = text;
+      el.className = 'message ' + (isError ? 'error' : 'success');
     }
 
-    projects.forEach((p) => {
-      const tr = document.createElement('tr');
+    // -------- Create New Project --------
+    createBtn.addEventListener('click', async () => {
+      createMessage.textContent = '';
 
-      const members = Array.isArray(p.members_list) ? p.members_list.join(', ') : '';
-      const hwIds = Array.isArray(p.hardware_set_id) ? p.hardware_set_id.join(', ') : '';
-      const hwCount = p.num_of_hardware_sets != null ? p.num_of_hardware_sets : '';
+      const project_id = document.getElementById('newProjectId').value.trim();
+      const project_name = document.getElementById('newProjectName').value.trim();
+      const project_desc = document.getElementById('newProjectDesc').value.trim();
+      const members_raw = document.getElementById('newMembers').value.trim();
+      const hardware_raw = document.getElementById('newHardwareIds').value.trim();
+      const num_raw = document.getElementById('newNumHardware').value.trim();
 
-      tr.innerHTML = `
-        <td>${p.project_id || ''}</td>
-        <td>
-          <div style="font-weight:600;color:#252742;">
-            ${p.project_name || ''}
-          </div>
-          <div style="font-size:12px;color:#777;margin-top:2px;">
-            ${p.project_desc || ''}
-          </div>
-        </td>
-        <td>
-          ${members
-            ? members
-                .split(',')
-                .map(m => '<span class="tag">' + m.trim() + '</span>')
-                .join(' ')
-            : ''}
-        </td>
-        <td>
-          ${hwIds
-            ? hwIds
-                .split(',')
-                .map(h => '<span class="tag">' + h.trim() + '</span>')
-                .join(' ')
-            : ''}
-          ${hwCount !== '' ? `<div style="font-size:11px;color:#666;margin-top:2px;">Count: ${hwCount}</div>` : ''}
-        </td>
-      `;
+      if (!project_id || !project_name) {
+        setMessage(createMessage, 'Project ID and Project Name are required.', true);
+        return;
+      }
 
-      projectsBody.appendChild(tr);
+      const payload = {
+        project_id,
+        project_name,
+        project_desc,
+        members_list: members_raw,          // backend will split commas
+        hardware_set_id: hardware_raw,      // backend will split commas
+        num_of_hardware_sets: num_raw || 0
+      };
+
+      try {
+        const resp = await fetch('/projects', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await resp.json();
+
+        if (!resp.ok || !data.success) {
+          setMessage(createMessage, data.message || 'Failed to create project.', true);
+          return;
+        }
+
+        setMessage(createMessage, 'Project created successfully.');
+
+        // Optional: clear fields
+        // document.getElementById('newProjectId').value = '';
+        // document.getElementById('newProjectName').value = '';
+        // document.getElementById('newProjectDesc').value = '';
+        // document.getElementById('newMembers').value = '';
+        // document.getElementById('newHardwareIds').value = '';
+        // document.getElementById('newNumHardware').value = '';
+
+      } catch (err) {
+        console.error(err);
+        setMessage(createMessage, 'Error calling /projects (create).', true);
+      }
     });
-  }
 
-  async function loadProjects() {
-    statusBar.textContent = 'Loading projects from /projects...';
-    statusBar.className = 'status-bar loading';
-    hideMessage();
+    // -------- Access Existing Project --------
+    accessBtn.addEventListener('click', async () => {
+      accessMessage.textContent = '';
+      detailBox.style.display = 'none';
 
-    try {
-      const res = await fetch('/projects');
-      const data = await res.json();
-
-      if (!res.ok || !data.success) {
-        statusBar.textContent = data.message || 'Failed to load projects.';
-        statusBar.className = 'status-bar error';
+      const project_id = document.getElementById('existingProjectId').value.trim();
+      if (!project_id) {
+        setMessage(accessMessage, 'Please enter a Project ID.', true);
         return;
       }
 
-      renderProjects(data.projects);
-      statusBar.textContent = `Loaded ${data.projects.length} project(s).`;
-      statusBar.className = 'status-bar';
-    } catch (err) {
-      console.error('Error loading projects', err);
-      statusBar.textContent = 'Error calling /projects.';
-      statusBar.className = 'status-bar error';
-    }
-  }
+      try {
+        const resp = await fetch(`/projects/${encodeURIComponent(project_id)}`);
+        const data = await resp.json();
 
-  document.getElementById('createProjectForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    hideMessage();
+        if (!resp.ok || !data.success) {
+          setMessage(accessMessage, data.message || 'Project not found.', true);
+          return;
+        }
 
-    const project_id = document.getElementById('projectId').value.trim();
-    const project_name = document.getElementById('projectName').value.trim();
-    const project_desc = document.getElementById('projectDesc').value.trim();
-    const members_raw = document.getElementById('membersList').value.trim();
-    const hardware_raw = document.getElementById('hardwareSetId').value.trim();
-    const num_hw_str = document.getElementById('numHardwareSets').value.trim();
+        const p = data.project || {};
 
-    if (!project_id || !project_name) {
-      showMessage('Project ID and Name are required.', 'error');
-      return;
-    }
+        detailName.textContent = p.project_name || '';
+        detailDesc.textContent = p.project_desc || '';
 
-    const members_list = members_raw
-      ? members_raw.split(',').map((m) => m.trim()).filter(Boolean)
-      : [];
-    const hardware_set_id = hardware_raw
-      ? hardware_raw.split(',').map((h) => h.trim()).filter(Boolean)
-      : [];
-    const num_of_hardware_sets = num_hw_str ? parseInt(num_hw_str, 10) : 0;
+        const hwList = Array.isArray(p.hardware_set_id) ? p.hardware_set_id : [];
+        detailHardware.textContent =
+          hwList.length ? hwList.join(', ') : 'No hardware sets available';
 
-    const payload = {
-      project_id,
-      project_name,
-      project_desc,
-      members_list,
-      num_of_hardware_sets,
-      hardware_set_id
-    };
+        const checked = typeof p.num_of_hardware_sets === 'number'
+          ? p.num_of_hardware_sets
+          : parseInt(p.num_of_hardware_sets || '0', 10) || 0;
+        detailChecked.textContent = checked;
 
-    try {
-      const res = await fetch('/projects', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-      const data = await res.json();
+        detailBox.style.display = 'block';
+        accessMessage.textContent = '';
 
-      if (!res.ok || !data.success) {
-        showMessage(data.message || 'Failed to create project.', 'error');
-        return;
+      } catch (err) {
+        console.error(err);
+        setMessage(accessMessage, 'Error calling /projects (get).', true);
       }
-
-      showMessage('Project created successfully.', 'success');
-      // Append new project to table
-      await loadProjects();
-      e.target.reset();
-      document.getElementById('numHardwareSets').value = 1;
-    } catch (err) {
-      console.error('Error creating project', err);
-      showMessage('Error calling /projects.', 'error');
-    }
-  });
-
-  document.addEventListener('DOMContentLoaded', loadProjects);
-</script>
+    });
+  </script>
 </body>
 </html>
