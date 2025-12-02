@@ -1,18 +1,22 @@
 import os
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
 from config import Config
 from projectdb import ProjectDB
 from project import Project
 
 def create_app() -> Flask:
-    app = Flask(__name__)
+    app = Flask(
+        __name__,
+        template_folder="templates",  # so /templates/index.html works
+        static_folder="static",      # in case you add JS/CSS later
+    )
     app.config.from_object(Config)
 
     # CORS
     CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=False)
 
-    # Mongo Projects DB init
+    # Mongo Projects DB init (same as your original)
     project_db = ProjectDB(
         host=app.config.get("MONGO_HOST", "localhost"),
         port=app.config.get("MONGO_PORT", 27017),
@@ -22,13 +26,22 @@ def create_app() -> Flask:
         auth_source=app.config.get("MONGO_AUTHSOURCE", "admin"),
     )
 
+    # ============== UI PAGE ==============
     @app.get("/")
     def root():
-        return "Projects microservice is running.", 200
+        """
+        Render the Projects dashboard UI (HTML).
+        The JS inside index.html will call /projects.
+        """
+        return render_template("index.html")
 
+    # ============== HEALTH ==============
     @app.get("/health")
     def health():
+        # You can make this smarter later (e.g., ping DB)
         return jsonify({"status": "ok", "service": "projects"}), 200
+
+    # ============== PROJECTS JSON API (your existing CRUD) ==============
 
     @app.post("/projects")
     def create_project_route():
@@ -41,7 +54,9 @@ def create_app() -> Flask:
                 "message": "project_id and project_name are required"
             }), 400
 
+        # default members_list if missing
         data.setdefault("members_list", [])
+        # Let your Project model handle normalization
         project_obj = Project.from_dict(data)
         created = project_db.create_project(project_obj.to_dict())
         return jsonify({"success": True, "project": created}), 201
@@ -78,5 +93,9 @@ def create_app() -> Flask:
 
 if __name__ == "__main__":
     app = create_app()
+    # keep Heroku-compatible PORT env but default to your old 5003
     port = int(os.getenv("PORT", "5003"))
     app.run(host="0.0.0.0", port=port, debug=False)
+else:
+    # for gunicorn: gunicorn "app:create_app()"
+    app = create_app()

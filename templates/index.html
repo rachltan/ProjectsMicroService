@@ -2,244 +2,431 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>User Authentication</title>
+<title>Projects Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <style>
-  *{margin:0;padding:0;box-sizing:border-box}
-  body{
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
     font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background:white;min-height:100vh;display:flex;
-    justify-content:center;align-items:center;padding:20px
-  }
-  .container{
-    background:white;padding:40px;border-radius:16px;
-    box-shadow:0 20px 60px rgba(0,0,0,0.3);
-    width:100%;max-width:400px
-  }
-  h1{text-align:center;color:#333;margin-bottom:30px;font-size:28px}
-  .form-group{margin-bottom:20px}
-  label{display:block;margin-bottom:8px;color:#555;font-weight:500}
-  input{
-    width:100%;padding:12px;border:2px solid #e0e0e0;
-    border-radius:8px;font-size:16px;transition:border-color .3s
-  }
-  input:focus{outline:none;border-color:#667eea}
-  button{
-    width:100%;padding:14px;
-    background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
-    color:white;border:none;border-radius:8px;
-    font-size:16px;font-weight:600;cursor:pointer;
-    transition:transform .2s;margin-top:10px
-  }
-  button:hover{transform:translateY(-2px)}
-  button:active{transform:translateY(0)}
-  .toggle-link{text-align:center;margin-top:20px;color:#666}
-  .toggle-link a{color:#667eea;text-decoration:none;font-weight:600}
-  .toggle-link a:hover{text-decoration:underline}
-  .message{
-    padding:12px;border-radius:8px;margin-bottom:20px;
-    text-align:center;display:none
-  }
-  .message.success{
-    background:#d4edda;color:#155724;border:1px solid #c3e6cb
-  }
-  .message.error{
-    background:#f8d7da;color:#721c24;border:1px solid #f5c6cb
-  }
-  .hidden{display:none}
-  .dashboard{text-align:center}
-  .dashboard h2{color:#333;margin-bottom:20px}
-  .user-info{
-    background:#f8f9fa;padding:20px;border-radius:8px;
-    margin-bottom:20px
-  }
-  .user-info p{color:#555;margin:10px 0}
-  #logoutBtn{background:#4f9cff}
-  #logoutBtn:hover{background:#1b4b9c}
-
-  /* === TOGGLE / TABS STYLE === */
-  .tab-toggle-wrapper{
+    background:#f5f5f5;
+    min-height:100vh;
     display:flex;
-    justify-content:space-between;
-    gap:10px;
-    margin-bottom:15px;
+    justify-content:center;
+    align-items:center;
+    padding:20px;
   }
-  .tab-toggle{
-    flex:1;
+  .container {
+    background:white;
+    padding:32px 28px;
+    border-radius:16px;
+    box-shadow:0 20px 60px rgba(0,0,0,0.25);
+    width:100%;
+    max-width:900px;
+  }
+  h1 {
+    text-align:left;
+    color:#333;
+    margin-bottom:8px;
+    font-size:26px;
+  }
+  .subtitle {
+    color:#666;
+    font-size:14px;
+    margin-bottom:24px;
+  }
+  .message {
     padding:10px 12px;
-    border-radius:999px;
-    border:1px solid #d0d4ff;
-    background:#f1f3ff;
+    border-radius:8px;
+    margin-bottom:16px;
+    text-align:left;
+    display:none;
+    font-size:14px;
+  }
+  .message.success {
+    background:#d4edda;
+    color:#155724;
+    border:1px solid #c3e6cb;
+  }
+  .message.error {
+    background:#f8d7da;
+    color:#721c24;
+    border:1px solid #f5c6cb;
+  }
+
+  .layout {
+    display:flex;
+    gap:24px;
+    flex-wrap:wrap;
+  }
+  .left, .right {
+    flex:1 1 300px;
+  }
+
+  /* Form styles */
+  .card {
+    background:#fafafa;
+    border-radius:12px;
+    padding:18px 16px;
+    border:1px solid #e4e4e4;
+  }
+  .card h2 {
+    font-size:18px;
+    margin-bottom:12px;
+    color:#333;
+  }
+  .form-group {
+    margin-bottom:12px;
+  }
+  label {
+    display:block;
+    margin-bottom:6px;
+    color:#555;
+    font-weight:500;
+    font-size:14px;
+  }
+  input, textarea {
+    width:100%;
+    padding:10px;
+    border:2px solid #e0e0e0;
+    border-radius:8px;
+    font-size:14px;
+    transition:border-color .2s;
+    font-family:inherit;
+  }
+  input:focus, textarea:focus {
+    outline:none;
+    border-color:#667eea;
+  }
+  textarea {
+    min-height:60px;
+    resize:vertical;
+  }
+  button {
+    padding:10px 16px;
+    background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+    color:white;
+    border:none;
+    border-radius:8px;
     font-size:14px;
     font-weight:600;
     cursor:pointer;
-    text-align:center;
-    text-decoration:none;
-    color:#333;
-    transition:background .15s, transform .15s;
+    transition:transform .15s, box-shadow .15s;
   }
-  .tab-toggle:hover{
-    background:#dfe3ff;
+  button:hover {
     transform:translateY(-1px);
+    box-shadow:0 4px 10px rgba(0,0,0,0.15);
+  }
+  button:active {
+    transform:translateY(0);
+    box-shadow:none;
+  }
+
+  /* Projects table */
+  table {
+    width:100%;
+    border-collapse:collapse;
+    font-size:13px;
+    margin-top:4px;
+    border-radius:10px;
+    overflow:hidden;
+  }
+  thead {
+    background:#f3f4ff;
+  }
+  th, td {
+    padding:9px 10px;
+    text-align:left;
+  }
+  th {
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    color:#7a7fa0;
+    border-bottom:1px solid #e0e3f0;
+  }
+  tbody tr:nth-child(even) {
+    background:#fafbff;
+  }
+  tbody tr:hover {
+    background:#eef2ff;
+  }
+  .tag {
+    display:inline-block;
+    padding:2px 8px;
+    border-radius:999px;
+    background:#e5f3ff;
+    color:#25548f;
+    font-size:11px;
+    margin-right:4px;
+  }
+  .badge {
+    display:inline-flex;
+    padding:3px 10px;
+    border-radius:999px;
+    background:#e3ebff;
+    color:#3955d3;
+    font-size:11px;
+    font-weight:600;
+    letter-spacing:0.04em;
+    text-transform:uppercase;
+    margin-bottom:8px;
+  }
+  .status-bar {
+    font-size:12px;
+    margin-top:6px;
+    color:#888;
+  }
+  .status-bar.loading {
+    color:#5b6ff6;
+  }
+  .status-bar.error {
+    color:#b3261e;
+  }
+
+  .footer-links {
+    margin-top:16px;
+    font-size:12px;
+    color:#888;
+    display:flex;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:8px;
+  }
+  .footer-links a {
+    color:#667eea;
+    text-decoration:none;
+    font-weight:500;
+  }
+  .footer-links a:hover {
+    text-decoration:underline;
   }
 </style>
 </head>
 <body>
   <div class="container">
+    <div class="badge">Projects Microservice</div>
+    <h1>Projects Dashboard</h1>
+    <p class="subtitle">
+      View and manage project records stored in the MongoDB <strong>projects_db</strong> backend.
+      This UI talks directly to the <code>/projects</code> API exposed by your microservice.
+    </p>
+
     <div id="message" class="message"></div>
 
-    <!-- AUTH SECTION (before login) -->
-    <div id="authSection">
-      <h1 id="formTitle">Login</h1>
-      <form id="authForm">
-        <div class="form-group">
-          <label for="username">Username</label>
-          <input id="username" name="username" required/>
+    <div class="layout">
+      <!-- LEFT: CREATE PROJECT -->
+      <div class="left">
+        <div class="card">
+          <h2>Create New Project</h2>
+          <form id="createProjectForm">
+            <div class="form-group">
+              <label for="projectId">Project ID</label>
+              <input id="projectId" name="projectId" placeholder="e.g. P3" required />
+            </div>
+            <div class="form-group">
+              <label for="projectName">Project Name</label>
+              <input id="projectName" name="projectName" placeholder="e.g. Heroku Demo Project" required />
+            </div>
+            <div class="form-group">
+              <label for="projectDesc">Description</label>
+              <textarea id="projectDesc" name="projectDesc" placeholder="Short description"></textarea>
+            </div>
+            <div class="form-group">
+              <label for="membersList">Members (comma-separated)</label>
+              <input id="membersList" name="membersList" placeholder="rachel, alex, ..." />
+            </div>
+            <div class="form-group">
+              <label for="numHardwareSets">Number of Hardware Sets</label>
+              <input id="numHardwareSets" name="numHardwareSets" type="number" min="0" value="1" />
+            </div>
+            <div class="form-group">
+              <label for="hardwareSetId">Hardware Set IDs (comma-separated)</label>
+              <input id="hardwareSetId" name="hardwareSetId" placeholder="HW1, HW2" />
+            </div>
+            <button type="submit">Create Project</button>
+          </form>
         </div>
-        <div class="form-group">
-          <label for="password">Password</label>
-          <input id="password" name="password" type="password" required/>
+      </div>
+
+      <!-- RIGHT: PROJECTS TABLE -->
+      <div class="right">
+        <div class="card">
+          <h2>Existing Projects</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Name / Description</th>
+                <th>Members</th>
+                <th>Hardware</th>
+              </tr>
+            </thead>
+            <tbody id="projectsBody">
+              <!-- rows injected by JS -->
+            </tbody>
+          </table>
+          <div id="statusBar" class="status-bar"></div>
         </div>
-        <button id="submitBtn" type="submit">Login</button>
-      </form>
-      <div class="toggle-link">
-        <span id="toggleText">Don't have an account?</span>
-        <a href="#" id="toggleLink">Sign Up</a>
       </div>
     </div>
 
-    <!-- DASHBOARD SECTION (AFTER LOGIN) -->
-    <div id="dashboardSection" class="hidden">
-      <div class="dashboard">
-        <h2>Welcome!</h2>
-        <div class="user-info">
-          <p><strong>Username:</strong> <span id="displayUsername"></span></p>
-          <p><strong>Status:</strong> Logged In</p>
-        </div>
-
-        <!-- 🔥 HERE ARE YOUR TWO TOGGLES -->
-        <div class="tab-toggle-wrapper">
-          <a class="tab-toggle" href="/hardware">Hardware</a>
-          <a class="tab-toggle" href="/top10companies">Top 10 Companies</a>
-        </div>
-
-        <button id="logoutBtn">Logout</button>
-      </div>
+    <div class="footer-links">
+      <span>Deployed at: <code id="hostSpan"></code></span>
+      <a href="/health" target="_blank">Health check → /health</a>
     </div>
   </div>
 
 <script>
-  let isLoginMode = true;
-  const authForm = document.getElementById('authForm');
-  const toggleLink = document.getElementById('toggleLink');
-  const formTitle = document.getElementById('formTitle');
-  const submitBtn = document.getElementById('submitBtn');
-  const toggleText = document.getElementById('toggleText');
   const messageDiv = document.getElementById('message');
+  const projectsBody = document.getElementById('projectsBody');
+  const statusBar = document.getElementById('statusBar');
+  const hostSpan = document.getElementById('hostSpan');
 
-  // On page load: validate token with /me
-  window.addEventListener('DOMContentLoaded', async () => {
-    const token = localStorage.getItem('access_token');
-    const username = localStorage.getItem('username');
-    if (!token || !username) {
-      showAuthSection();
-      return;
-    }
-    try {
-      const r = await fetch('/me', {
-        headers: { 'Authorization': 'Bearer ' + token }
-      });
-      if (r.ok) {
-        showDashboard(username);
-      } else {
-        localStorage.clear();
-        showAuthSection();
-      }
-    } catch (_) {
-      localStorage.clear();
-      showAuthSection();
-    }
-  });
-
-  toggleLink.addEventListener('click', (e) => {
-    e.preventDefault();
-    isLoginMode = !isLoginMode;
-    if (isLoginMode) {
-      formTitle.textContent = 'Login';
-      submitBtn.textContent = 'Login';
-      toggleText.textContent = "Don't have an account?";
-      toggleLink.textContent = 'Sign Up';
-    } else {
-      formTitle.textContent = 'Sign Up';
-      submitBtn.textContent = 'Create Account';
-      toggleText.textContent = 'Already have an account?';
-      toggleLink.textContent = 'Login';
-    }
-    hideMessage();
-  });
-
-  authForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const username = document.getElementById('username').value.trim();
-    const password = document.getElementById('password').value;
-    const endpoint = isLoginMode ? '/logIn' : '/createAccount';
-
-    try {
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ Username: username, pswd: password })
-      });
-      const data = await response.json();
-      if (data.success) {
-        showMessage(data.message || 'Success', 'success');
-        localStorage.setItem('access_token', data.access_token);
-        localStorage.setItem('username', data.user.username);
-        setTimeout(() => showDashboard(data.user.username), 400);
-      } else {
-        showMessage(data.message || 'Failed', 'error');
-      }
-    } catch {
-      showMessage('Connection error. Please try again.', 'error');
-    }
-  });
-
-  document.getElementById('logoutBtn').addEventListener('click', async () => {
-    const token = localStorage.getItem('access_token');
-    try {
-      await fetch('/logOut', {
-        method: 'POST',
-        headers: {
-          'Authorization': 'Bearer ' + token,
-          'Content-Type': 'application/json'
-        }
-      });
-    } catch {}
-    localStorage.clear();
-    showAuthSection();
-    showMessage('Logged out successfully', 'success');
-  });
+  hostSpan.textContent = window.location.origin;
 
   function showMessage(text, type) {
     messageDiv.textContent = text;
     messageDiv.className = 'message ' + type;
     messageDiv.style.display = 'block';
   }
-  function hideMessage(){ messageDiv.style.display = 'none'; }
+  function hideMessage() {
+    messageDiv.style.display = 'none';
+  }
 
-  function showDashboard(username){
-    document.getElementById('authSection').classList.add('hidden');
-    document.getElementById('dashboardSection').classList.remove('hidden');
-    document.getElementById('displayUsername').textContent = username;
+  function renderProjects(projects) {
+    projectsBody.innerHTML = '';
+
+    if (!projects || projects.length === 0) {
+      const tr = document.createElement('tr');
+      tr.innerHTML =
+        '<td colspan="4" style="text-align:center;padding:16px;color:#888;">No projects found. Create one on the left.</td>';
+      projectsBody.appendChild(tr);
+      return;
+    }
+
+    projects.forEach((p) => {
+      const tr = document.createElement('tr');
+
+      const members = Array.isArray(p.members_list) ? p.members_list.join(', ') : '';
+      const hwIds = Array.isArray(p.hardware_set_id) ? p.hardware_set_id.join(', ') : '';
+      const hwCount = p.num_of_hardware_sets != null ? p.num_of_hardware_sets : '';
+
+      tr.innerHTML = `
+        <td>${p.project_id || ''}</td>
+        <td>
+          <div style="font-weight:600;color:#252742;">
+            ${p.project_name || ''}
+          </div>
+          <div style="font-size:12px;color:#777;margin-top:2px;">
+            ${p.project_desc || ''}
+          </div>
+        </td>
+        <td>
+          ${members
+            ? members
+                .split(',')
+                .map(m => '<span class="tag">' + m.trim() + '</span>')
+                .join(' ')
+            : ''}
+        </td>
+        <td>
+          ${hwIds
+            ? hwIds
+                .split(',')
+                .map(h => '<span class="tag">' + h.trim() + '</span>')
+                .join(' ')
+            : ''}
+          ${hwCount !== '' ? `<div style="font-size:11px;color:#666;margin-top:2px;">Count: ${hwCount}</div>` : ''}
+        </td>
+      `;
+
+      projectsBody.appendChild(tr);
+    });
+  }
+
+  async function loadProjects() {
+    statusBar.textContent = 'Loading projects from /projects...';
+    statusBar.className = 'status-bar loading';
     hideMessage();
+
+    try {
+      const res = await fetch('/projects');
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        statusBar.textContent = data.message || 'Failed to load projects.';
+        statusBar.className = 'status-bar error';
+        return;
+      }
+
+      renderProjects(data.projects);
+      statusBar.textContent = `Loaded ${data.projects.length} project(s).`;
+      statusBar.className = 'status-bar';
+    } catch (err) {
+      console.error('Error loading projects', err);
+      statusBar.textContent = 'Error calling /projects.';
+      statusBar.className = 'status-bar error';
+    }
   }
 
-  function showAuthSection(){
-    document.getElementById('dashboardSection').classList.add('hidden');
-    document.getElementById('authSection').classList.remove('hidden');
-    document.getElementById('username').value = '';
-    document.getElementById('password').value = '';
-  }
+  document.getElementById('createProjectForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    hideMessage();
+
+    const project_id = document.getElementById('projectId').value.trim();
+    const project_name = document.getElementById('projectName').value.trim();
+    const project_desc = document.getElementById('projectDesc').value.trim();
+    const members_raw = document.getElementById('membersList').value.trim();
+    const hardware_raw = document.getElementById('hardwareSetId').value.trim();
+    const num_hw_str = document.getElementById('numHardwareSets').value.trim();
+
+    if (!project_id || !project_name) {
+      showMessage('Project ID and Name are required.', 'error');
+      return;
+    }
+
+    const members_list = members_raw
+      ? members_raw.split(',').map((m) => m.trim()).filter(Boolean)
+      : [];
+    const hardware_set_id = hardware_raw
+      ? hardware_raw.split(',').map((h) => h.trim()).filter(Boolean)
+      : [];
+    const num_of_hardware_sets = num_hw_str ? parseInt(num_hw_str, 10) : 0;
+
+    const payload = {
+      project_id,
+      project_name,
+      project_desc,
+      members_list,
+      num_of_hardware_sets,
+      hardware_set_id
+    };
+
+    try {
+      const res = await fetch('/projects', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        showMessage(data.message || 'Failed to create project.', 'error');
+        return;
+      }
+
+      showMessage('Project created successfully.', 'success');
+      // Append new project to table
+      await loadProjects();
+      e.target.reset();
+      document.getElementById('numHardwareSets').value = 1;
+    } catch (err) {
+      console.error('Error creating project', err);
+      showMessage('Error calling /projects.', 'error');
+    }
+  });
+
+  document.addEventListener('DOMContentLoaded', loadProjects);
 </script>
 </body>
 </html>
