@@ -1,244 +1,263 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Projects Dashboard</title>
-  <style>
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: #ffffff;
-      margin: 0;
-      padding: 24px;
-    }
-    .container {
-      max-width: 800px;
-      margin: 0 auto;
-    }
-    h1 {
-      font-size: 28px;
-      margin-bottom: 24px;
-    }
-    h2 {
-      font-size: 22px;
-      margin-bottom: 12px;
-    }
-    .panel {
-      border: 1px solid #ddd;
-      padding: 16px 18px 20px;
-      margin-bottom: 24px;
-    }
-    .form-row {
-      margin-bottom: 10px;
-    }
-    input, textarea {
-      width: 260px;
-      padding: 6px 8px;
-      font-size: 14px;
-      border: 1px solid #aaa;
-      border-radius: 2px;
-      box-sizing: border-box;
-    }
-    textarea {
-      height: 60px;
-      resize: vertical;
-    }
-    button {
-      padding: 6px 12px;
-      font-size: 14px;
-      border-radius: 2px;
-      border: 1px solid #444;
-      background: #f8f8f8;
-      cursor: pointer;
-    }
-    button:hover {
-      background: #eaeaea;
-    }
-    .message {
-      margin-top: 8px;
-      font-size: 14px;
-    }
-    .message.error {
-      color: #b3261e;
-    }
-    .message.success {
-      color: #1b5e20;
-    }
-    .project-details {
-      margin-top: 14px;
-      font-size: 15px;
-    }
-    .project-details p {
-      margin: 4px 0;
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Projects</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{
+    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background:white;min-height:100vh;display:flex;
+    justify-content:center;align-items:center;padding:20px
+  }
+  .container{
+    background:white;padding:40px;border-radius:16px;
+    box-shadow:0 20px 60px rgba(0,0,0,0.3);
+    width:100%;max-width:400px
+  }
+  h1{text-align:center;color:#333;margin-bottom:24px;font-size:26px}
+
+  .section-title{
+    font-size:18px;
+    font-weight:600;
+    color:#333;
+    margin-bottom:10px;
+  }
+
+  .form-group{margin-bottom:16px}
+  label{display:block;margin-bottom:6px;color:#555;font-weight:500}
+  input, textarea{
+    width:100%;padding:10px;border:2px solid #e0e0e0;
+    border-radius:8px;font-size:15px;transition:border-color .3s;
+    font-family:inherit;
+  }
+  input:focus, textarea:focus{outline:none;border-color:#667eea}
+  textarea{min-height:70px;resize:vertical}
+
+  button{
+    width:100%;padding:12px;
+    background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+    color:white;border:none;border-radius:8px;
+    font-size:15px;font-weight:600;cursor:pointer;
+    transition:transform .2s;margin-top:4px
+  }
+  button:hover{transform:translateY(-2px)}
+  button:active{transform:translateY(0)}
+
+  .sub-button{
+    margin-top:10px;
+    background:linear-gradient(135deg,#4f9cff 0%,#325fb3 100%);
+  }
+
+  .message{
+    padding:10px;border-radius:8px;margin-bottom:14px;
+    text-align:center;display:none;font-size:14px;
+  }
+  .message.success{
+    background:#d4edda;color:#155724;border:1px solid #c3e6cb
+  }
+  .message.error{
+    background:#f8d7da;color:#721c24;border:1px solid #f5c6cb
+  }
+
+  .divider{
+    height:1px;
+    background:#e3e3e3;
+    margin:20px 0;
+  }
+
+  .project-details{
+    margin-top:8px;font-size:14px;color:#333;
+  }
+  .project-details p{
+    margin:4px 0;
+  }
+</style>
 </head>
 <body>
   <div class="container">
     <h1>Projects</h1>
 
-    <!-- ============= CREATE NEW PROJECT ============= -->
-    <div class="panel">
-      <h2>Create New Project</h2>
+    <!-- GLOBAL MESSAGE (for quick feedback) -->
+    <div id="globalMessage" class="message"></div>
 
-      <div class="form-row">
-        <input id="newProjectId" placeholder="Project ID">
-      </div>
-      <div class="form-row">
-        <input id="newProjectName" placeholder="Project Name">
-      </div>
-      <div class="form-row">
-        <textarea id="newProjectDesc" placeholder="Description"></textarea>
-      </div>
-      <div class="form-row">
-        <input id="newMembers" placeholder="Members (comma separated)">
-      </div>
-      <div class="form-row">
-        <input id="newHardwareIds" placeholder="Hardware Set IDs (comma separated)">
-      </div>
-      <div class="form-row">
-        <input id="newNumHardware" placeholder="# Hardware Sets Checked Out" type="number" min="0">
+    <!-- ===== CREATE NEW PROJECT ===== -->
+    <div>
+      <div class="section-title">Create New Project</div>
+
+      <div class="form-group">
+        <label for="newProjectId">Project ID</label>
+        <input id="newProjectId" placeholder="e.g. P1001" />
       </div>
 
-      <button id="createBtn">Create</button>
+      <div class="form-group">
+        <label for="newProjectName">Project Name</label>
+        <input id="newProjectName" placeholder="My Cool Project" />
+      </div>
 
+      <div class="form-group">
+        <label for="newProjectDesc">Description</label>
+        <textarea id="newProjectDesc" placeholder="Short description"></textarea>
+      </div>
+
+      <button id="createBtn" type="button">Create Project</button>
       <div id="createMessage" class="message"></div>
     </div>
 
-    <!-- ============= EXISTING PROJECT ============= -->
-    <div class="panel">
-      <h2>Existing Project</h2>
+    <div class="divider"></div>
 
-      <div class="form-row">
-        <input id="existingProjectId" placeholder="Project ID">
+    <!-- ===== ACCESS EXISTING PROJECT ===== -->
+    <div>
+      <div class="section-title">Access Existing Project</div>
+
+      <div class="form-group">
+        <label for="accessProjectId">Project ID</label>
+        <input id="accessProjectId" placeholder="Enter existing Project ID" />
       </div>
 
-      <button id="accessBtn">Access Project</button>
-
+      <button id="accessBtn" type="button">Access Project</button>
       <div id="accessMessage" class="message"></div>
 
       <div id="projectDetails" class="project-details" style="display:none;">
         <p><strong>Project Name:</strong> <span id="detailName"></span></p>
         <p><strong>Description:</strong> <span id="detailDesc"></span></p>
-        <p><strong>Hardware Sets:</strong> <span id="detailHardware"></span></p>
+        <p><strong>Hardware Sets:</strong> <span id="detailHardwareSummary"></span></p>
         <p><strong>Checked Out:</strong> <span id="detailChecked"></span></p>
+
+        <button id="hardwarePopupBtn" type="button" class="sub-button">
+          Show Hardware Sets
+        </button>
       </div>
     </div>
   </div>
 
-  <script>
-    const createBtn = document.getElementById('createBtn');
-    const accessBtn = document.getElementById('accessBtn');
+<script>
+  const globalMessage = document.getElementById('globalMessage');
+  const createMessage = document.getElementById('createMessage');
+  const accessMessage = document.getElementById('accessMessage');
 
-    const createMessage = document.getElementById('createMessage');
-    const accessMessage = document.getElementById('accessMessage');
+  const createBtn = document.getElementById('createBtn');
+  const accessBtn = document.getElementById('accessBtn');
+  const hardwarePopupBtn = document.getElementById('hardwarePopupBtn');
 
-    const detailBox = document.getElementById('projectDetails');
-    const detailName = document.getElementById('detailName');
-    const detailDesc = document.getElementById('detailDesc');
-    const detailHardware = document.getElementById('detailHardware');
-    const detailChecked = document.getElementById('detailChecked');
+  const projectDetailsDiv = document.getElementById('projectDetails');
+  const detailName = document.getElementById('detailName');
+  const detailDesc = document.getElementById('detailDesc');
+  const detailHardwareSummary = document.getElementById('detailHardwareSummary');
+  const detailChecked = document.getElementById('detailChecked');
 
-    function setMessage(el, text, isError = false) {
-      el.textContent = text;
-      el.className = 'message ' + (isError ? 'error' : 'success');
+  let currentHardwareSets = [];
+
+  function showMessage(el, text, type) {
+    el.textContent = text;
+    el.className = 'message ' + type;
+    el.style.display = 'block';
+  }
+  function hideMessage(el) {
+    el.style.display = 'none';
+  }
+
+  // ===== CREATE PROJECT =====
+  createBtn.addEventListener('click', async () => {
+    hideMessage(createMessage);
+    hideMessage(globalMessage);
+
+    const project_id = document.getElementById('newProjectId').value.trim();
+    const project_name = document.getElementById('newProjectName').value.trim();
+    const project_desc = document.getElementById('newProjectDesc').value.trim();
+
+    if (!project_id || !project_name) {
+      showMessage(createMessage, 'Project ID and Project Name are required.', 'error');
+      return;
     }
 
-    // -------- Create New Project --------
-    createBtn.addEventListener('click', async () => {
-      createMessage.textContent = '';
+    const payload = {
+      project_id,
+      project_name,
+      project_desc
+    };
 
-      const project_id = document.getElementById('newProjectId').value.trim();
-      const project_name = document.getElementById('newProjectName').value.trim();
-      const project_desc = document.getElementById('newProjectDesc').value.trim();
-      const members_raw = document.getElementById('newMembers').value.trim();
-      const hardware_raw = document.getElementById('newHardwareIds').value.trim();
-      const num_raw = document.getElementById('newNumHardware').value.trim();
+    try {
+      const resp = await fetch('/projects', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await resp.json();
 
-      if (!project_id || !project_name) {
-        setMessage(createMessage, 'Project ID and Project Name are required.', true);
+      if (!resp.ok || !data.success) {
+        showMessage(createMessage, data.message || 'Failed to create project.', 'error');
         return;
       }
 
-      const payload = {
-        project_id,
-        project_name,
-        project_desc,
-        members_list: members_raw,          // backend will split commas
-        hardware_set_id: hardware_raw,      // backend will split commas
-        num_of_hardware_sets: num_raw || 0
-      };
+      showMessage(createMessage, 'Project created successfully.', 'success');
 
-      try {
-        const resp = await fetch('/projects', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-        const data = await resp.json();
+    } catch (err) {
+      console.error(err);
+      showMessage(createMessage, 'Error calling /projects (create).', 'error');
+    }
+  });
 
-        if (!resp.ok || !data.success) {
-          setMessage(createMessage, data.message || 'Failed to create project.', true);
-          return;
-        }
+  // ===== ACCESS PROJECT =====
+  accessBtn.addEventListener('click', async () => {
+    hideMessage(accessMessage);
+    hideMessage(globalMessage);
+    projectDetailsDiv.style.display = 'none';
+    currentHardwareSets = [];
 
-        setMessage(createMessage, 'Project created successfully.');
+    const project_id = document.getElementById('accessProjectId').value.trim();
+    if (!project_id) {
+      showMessage(accessMessage, 'Please enter a Project ID.', 'error');
+      return;
+    }
 
-        // Optional: clear fields
-        // document.getElementById('newProjectId').value = '';
-        // document.getElementById('newProjectName').value = '';
-        // document.getElementById('newProjectDesc').value = '';
-        // document.getElementById('newMembers').value = '';
-        // document.getElementById('newHardwareIds').value = '';
-        // document.getElementById('newNumHardware').value = '';
+    try {
+      const resp = await fetch(`/projects/${encodeURIComponent(project_id)}`);
+      const data = await resp.json();
 
-      } catch (err) {
-        console.error(err);
-        setMessage(createMessage, 'Error calling /projects (create).', true);
-      }
-    });
-
-    // -------- Access Existing Project --------
-    accessBtn.addEventListener('click', async () => {
-      accessMessage.textContent = '';
-      detailBox.style.display = 'none';
-
-      const project_id = document.getElementById('existingProjectId').value.trim();
-      if (!project_id) {
-        setMessage(accessMessage, 'Please enter a Project ID.', true);
+      if (!resp.ok || !data.success) {
+        showMessage(accessMessage, data.message || 'Project not found.', 'error');
         return;
       }
 
-      try {
-        const resp = await fetch(`/projects/${encodeURIComponent(project_id)}`);
-        const data = await resp.json();
+      const p = data.project || {};
 
-        if (!resp.ok || !data.success) {
-          setMessage(accessMessage, data.message || 'Project not found.', true);
-          return;
-        }
+      detailName.textContent = p.project_name || '';
+      detailDesc.textContent = p.project_desc || '';
 
-        const p = data.project || {};
+      // hardware_set_id may be array or string
+      currentHardwareSets = Array.isArray(p.hardware_set_id)
+        ? p.hardware_set_id
+        : (p.hardware_set_id ? [String(p.hardware_set_id)] : []);
 
-        detailName.textContent = p.project_name || '';
-        detailDesc.textContent = p.project_desc || '';
-
-        const hwList = Array.isArray(p.hardware_set_id) ? p.hardware_set_id : [];
-        detailHardware.textContent =
-          hwList.length ? hwList.join(', ') : 'No hardware sets available';
-
-        const checked = typeof p.num_of_hardware_sets === 'number'
-          ? p.num_of_hardware_sets
-          : parseInt(p.num_of_hardware_sets || '0', 10) || 0;
-        detailChecked.textContent = checked;
-
-        detailBox.style.display = 'block';
-        accessMessage.textContent = '';
-
-      } catch (err) {
-        console.error(err);
-        setMessage(accessMessage, 'Error calling /projects (get).', true);
+      if (currentHardwareSets.length === 0) {
+        detailHardwareSummary.textContent = 'No hardware sets available';
+      } else {
+        detailHardwareSummary.textContent = currentHardwareSets.join(', ');
       }
-    });
-  </script>
+
+      const checked = typeof p.num_of_hardware_sets === 'number'
+        ? p.num_of_hardware_sets
+        : parseInt(p.num_of_hardware_sets || '0', 10) || 0;
+      detailChecked.textContent = checked;
+
+      projectDetailsDiv.style.display = 'block';
+
+    } catch (err) {
+      console.error(err);
+      showMessage(accessMessage, 'Error calling /projects (get).', 'error');
+    }
+  });
+
+  // ===== HARDWARE POPUP =====
+  hardwarePopupBtn.addEventListener('click', () => {
+    if (!currentHardwareSets || currentHardwareSets.length === 0) {
+      alert('No hardware sets associated with this project.');
+    } else {
+      alert('Hardware sets for this project:\n\n' + currentHardwareSets.join(', '));
+    }
+  });
+</script>
 </body>
 </html>
