@@ -164,13 +164,19 @@ def create_app() -> Flask:
                     WHERE t.month_start_date = lm.latest_date
                 )
                 SELECT TOP 10
-                    brand_name,
-                    spend_amount,
-                    month_start_date
-                FROM Ranked
-                WHERE rn = 1
-                ORDER BY spend_amount DESC;
+                    r.brand_name,
+                    r.spend_amount,
+                    r.month_start_date,
+                    b.category,
+                    b.sector,
+                    b.target_state
+                FROM Ranked AS r
+                LEFT JOIN dbo.brand_detail AS b
+                    ON LOWER(r.brand_name) = LOWER(b.brand_name)
+                WHERE r.rn = 1
+                ORDER BY r.spend_amount DESC;
                 """
+
 
             df = pd.read_sql(query, conn)
             conn.close()
