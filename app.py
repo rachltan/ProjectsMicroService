@@ -43,33 +43,32 @@ def create_app():
     @app.route("/api/top10companies", methods=["GET"])
     def api_top10companies():
         query = """
-        WITH LatestMonth AS (
-            SELECT MAX(month_start_date) AS latest_date
-            FROM dbo.top10monthly
-        ),
-        Ranked AS (
-            SELECT
-                t.brand_name,
-                t.total_spend AS spend_amount,
-                t.month_start_date,
-                ROW_NUMBER() OVER (PARTITION BY t.brand_name ORDER BY t.monthly_rank ASC) AS rn
-            FROM dbo.top10monthly AS t
-            CROSS JOIN LatestMonth AS lm
-            WHERE t.month_start_date = lm.latest_date
-        )
-        SELECT TOP 10
-            r.brand_name,
-            r.spend_amount,
-            r.month_start_date,
-            b.category,
-            b.sector,
-            b.target_state
-        FROM Ranked AS r
-        LEFT JOIN ingest.stg_brand_detail AS b
-            ON LOWER(r.brand_name) = LOWER(b.brand_name)
-        WHERE r.rn = 1
-        ORDER BY r.spend_amount DESC;
-        """
+            WITH LatestMonth AS (
+                SELECT MAX(month_start_date) AS latest_date
+                FROM dbo.top10monthly
+            ),
+            Ranked AS (
+                SELECT
+                    t.brand_name,
+                    t.total_spend AS spend_amount,
+                    t.month_start_date,
+                    ROW_NUMBER() OVER (PARTITION BY t.brand_name ORDER BY t.monthly_rank ASC) AS rn
+                FROM dbo.top10monthly AS t
+                CROSS JOIN LatestMonth AS lm
+                WHERE t.month_start_date = lm.latest_date
+            )
+            SELECT TOP 10
+                r.brand_name,
+                r.spend_amount,
+                r.month_start_date,
+                d.STATE_ABBR AS target_state
+            FROM Ranked AS r
+            LEFT JOIN ingest.stg_daily_spend AS d
+                ON LOWER(r.brand_name) = LOWER(d.BRAND_NAME)
+            WHERE r.rn = 1
+            ORDER BY r.spend_amount DESC;
+            """
+
 
         df = _query_azure(query)
         if df is None or df.empty:
