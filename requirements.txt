@@ -8,3 +8,5 @@ gunicorn==22.0.0
 requests==2.32.3
 pandas==2.2.3
 pymssql==2.3.0
+SQLAlchemy==2.0.36
+pyodbc==5.2.0
