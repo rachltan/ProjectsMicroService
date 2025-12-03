@@ -1,213 +1,85 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Top Brands by Consumer Spending</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <style>
-    body{font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#f5f5f9;margin:0;padding:40px}
-    .card{max-width:1100px;margin:0 auto;background:#fff;border-radius:18px;padding:28px 32px 32px;box-shadow:0 18px 45px rgba(0,0,0,.12)}
-    .badge{display:inline-flex;align-items:center;padding:4px 10px;border-radius:999px;background:#e3ebff;color:#3955d3;font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;margin-bottom:6px}
-    h1{margin:0 0 4px;font-size:26px;color:#222}
-    .subtitle{margin:0 0 20px;font-size:14px;color:#666;max-width:680px;line-height:1.5}
-    .filters{display:flex;flex-wrap:wrap;gap:14px;margin-bottom:16px}
-    .filter-group{display:flex;flex-direction:column;font-size:13px;color:#555}
-    .filter-group label{margin-bottom:4px;font-weight:700}
-    .filter-group select{min-width:200px;padding:8px 10px;border-radius:10px;border:1px solid #d0d4e0;background:#fff;font-size:13px;outline:none}
-    table{width:100%;border-collapse:collapse;margin-top:6px;border-radius:12px;overflow:hidden;font-size:13px}
-    thead{background:#f3f4ff}
-    th,td{padding:10px 12px;text-align:left}
-    th{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:#7a7fa0;border-bottom:1px solid #e0e3f0}
-    tbody tr:nth-child(even){background:#fafbff}
-    tbody tr:hover{background:#eef2ff}
-    td.rank{width:40px;text-align:center;font-weight:700;color:#4b4f7a}
-    td.spend{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
-    .footer{margin-top:10px;font-size:11px;color:#888da8}
-    .meta{margin-top:4px;font-size:11px;color:#a0a4c0}
-    .row{display:flex;gap:10px;align-items:center;margin-top:10px}
-    .btn{appearance:none;border:0;border-radius:999px;padding:8px 14px;font-weight:700;cursor:pointer}
-    .btn-back{background:#5b6ff6;color:#fff}
-    .status{font-size:12px;margin-top:8px;color:#888}
-    .status.error{color:#b3261e}
-    .status.loading{color:#5b6ff6}
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Top Brands by Consumer Spending</title>
+<style>
+  body{
+    font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    background:#f6f7fb;
+    margin:0;
+    padding:30px;
+  }
+  h1{font-size:28px;margin-bottom:16px;color:#2b2e43}
+  table{
+    width:100%;
+    border-collapse:collapse;
+    background:#fff;
+    border-radius:10px;
+    overflow:hidden;
+    box-shadow:0 2px 10px rgba(0,0,0,.08);
+  }
+  th,td{
+    padding:12px 16px;
+    border-bottom:1px solid #e5e7eb;
+    text-align:left;
+  }
+  th{background:#eef2ff;font-weight:600;color:#374151}
+  tr:hover{background:#f9fafc}
+  #errorMsg{
+    margin-top:10px;
+    font-size:14px;
+    color:#b91c1c;
+  }
+</style>
 </head>
 <body>
-  <div class="card">
-    <div class="badge">Dewey Data System</div>
-    <h1>Top Brands by Consumer Spending</h1>
-    <p class="subtitle">Rank brands by consumer spend. You can deep-link here with <code>?state=TX&category=Grocery</code>.</p>
-
-    <div class="filters">
-      <div class="filter-group">
-        <label for="state-select">State</label>
-        <select id="state-select">
-          <option value="">All States</option>
-          <option value="AL">AL</option><option value="AK">AK</option><option value="AZ">AZ</option>
-          <option value="AR">AR</option><option value="CA">CA</option><option value="CO">CO</option>
-          <option value="CT">CT</option><option value="DE">DE</option><option value="FL">FL</option>
-          <option value="GA">GA</option><option value="HI">HI</option><option value="ID">ID</option>
-          <option value="IL">IL</option><option value="IN">IN</option><option value="IA">IA</option>
-          <option value="KS">KS</option><option value="KY">KY</option><option value="LA">LA</option>
-          <option value="ME">ME</option><option value="MD">MD</option><option value="MA">MA</option>
-          <option value="MI">MI</option><option value="MN">MN</option><option value="MS">MS</option>
-          <option value="MO">MO</option><option value="MT">MT</option><option value="NE">NE</option>
-          <option value="NV">NV</option><option value="NH">NH</option><option value="NJ">NJ</option>
-          <option value="NM">NM</option><option value="NY">NY</option><option value="NC">NC</option>
-          <option value="ND">ND</option><option value="OH">OH</option><option value="OK">OK</option>
-          <option value="OR">OR</option><option value="PA">PA</option><option value="RI">RI</option>
-          <option value="SC">SC</option><option value="SD">SD</option><option value="TN">TN</option>
-          <option value="TX">TX</option><option value="UT">UT</option><option value="VT">VT</option>
-          <option value="VA">VA</option><option value="WA">WA</option><option value="WV">WV</option>
-          <option value="WI">WI</option><option value="WY">WY</option>
-        </select>
-      </div>
-
-      <div class="filter-group">
-        <label for="category-input">Category</label>
-        <select id="category-input">
-          <option value="">All Categories</option>
-          <!-- You can later add known categories. Free text below will also work. -->
-        </select>
-      </div>
-
-      <div class="filter-group">
-        <label for="time-select">Year</label>
-        <select id="time-select">
-          <option value="2025">2025</option>
-          <option value="2024">2024</option>
-          <option value="2023">2023</option>
-          <option value="2022">2022</option>
-        </select>
-      </div>
-    </div>
-
-    <table>
-      <thead>
-        <tr>
-          <th>#</th><th>Brand</th><th>Sector</th><th>Category</th>
-          <th style="text-align:right;">Total Spend (USD)</th><th>State</th>
-        </tr>
-      </thead>
-      <tbody id="top10-body"></tbody>
-    </table>
-
-    <div class="row">
-      <button class="btn btn-back" onclick="goBack()">⬅ Back to Dashboard</button>
-      <div id="status" class="status"></div>
-    </div>
-
-    <div class="footer">Data source: Dewey daily spend (brand × state). Updated weekly via Azure Data Factory.</div>
-    <div class="meta">View powered by Dewey Data System microservice.</div>
-  </div>
+  <h1>Top 10 Brands by Consumer Spending</h1>
+  <table id="brandsTable">
+    <thead>
+      <tr>
+        <th>Rank</th>
+        <th>Brand Name</th>
+        <th>Sector</th>
+        <th>Category</th>
+        <th>State</th>
+        <th>Spend ($)</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+  <div id="errorMsg"></div>
 
 <script>
-  let allData = [];
-  const qs = new URLSearchParams(window.location.search);
-  const initialState = (qs.get('state') || '').toUpperCase();
-  const initialCategory = (qs.get('category') || '').trim();
-  const projectId = qs.get('project_id') || '';
+async function loadTopBrands() {
+  const res = await fetch('/api/top10companies');
+  const data = await res.json();
+  const tbody = document.querySelector('#brandsTable tbody');
+  tbody.innerHTML = '';
 
-  // Prefill selects from query string
-  document.addEventListener('DOMContentLoaded', () => {
-    if (initialState) {
-      const el = document.getElementById('state-select');
-      for (const o of el.options) if (o.value === initialState) o.selected = true;
-    }
-    // category: if it's not in the dropdown yet, add it
-    if (initialCategory) {
-      const catSel = document.getElementById('category-input');
-      const exists = [...catSel.options].some(o => o.value.toLowerCase() === initialCategory.toLowerCase());
-      if (!exists) {
-        const opt = document.createElement('option');
-        opt.value = initialCategory; opt.textContent = initialCategory;
-        catSel.appendChild(opt);
-      }
-      catSel.value = initialCategory;
-    }
-    loadTop10();
-  });
-
-  function goBack(){ window.location.href = '/'; }
-
-  function formatCurrency(v){
-    if (v == null || isNaN(v)) return '';
-    return Number(v).toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:2});
-  }
-
-  function filterAndRender(){
-    const selState = document.getElementById('state-select').value;
-    const selCat = document.getElementById('category-input').value;
-
-    let filtered = allData.filter(r => {
-      if (selState && r.state !== selState) return false;
-      if (selCat && String(r.category||'').toLowerCase() !== selCat.toLowerCase()) return false;
-      return true;
-    });
-
-    // sort by spend desc
-    filtered.sort((a,b) => (Number(b.spend_amount)||0) - (Number(a.spend_amount)||0));
-
-    const display = filtered.slice(0,10);
-    const tbody = document.getElementById('top10-body');
-    tbody.innerHTML = '';
-    if (!display.length){
+  if (data.success && Array.isArray(data.data)) {
+    data.data.forEach((item, i) => {
       const tr = document.createElement('tr');
-      tr.innerHTML = '<td colspan="6" style="text-align:center;padding:20px;color:#888;">No data for selected filters.</td>';
+      tr.innerHTML = `
+        <td>${i + 1}</td>
+        <td>${item.brand_name || ''}</td>
+        <td>${item.sector || ''}</td>
+        <td>${item.category || ''}</td>
+        <td>${item.state || ''}</td>
+        <td>${item.spend_amount?.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</td>
+      `;
       tbody.appendChild(tr);
-    } else {
-      display.forEach((row,i)=>{
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td class="rank">${i+1}</td>
-          <td>${row.brand_name||''}</td>
-          <td>${row.sector||''}</td>
-          <td>${row.category||''}</td>
-          <td class="spend">${formatCurrency(row.spend_amount)}</td>
-          <td>${row.state||''}</td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
-
-    const status = document.getElementById('status');
-    status.textContent = `Showing top ${display.length} brands${projectId?` for Project ${projectId}`:''}${selState?` • ${selState}`:''}${selCat?` • ${selCat}`:''}`;
-    status.classList.remove('error','loading');
+    });
+  } else {
+    tbody.innerHTML = `<tr><td colspan="6">No data available.</td></tr>`;
   }
 
-  async function loadTop10(){
-    const status = document.getElementById('status');
-    status.textContent = 'Loading...'; status.classList.add('loading');
-
-    try {
-      const year = document.getElementById('time-select').value;
-      const r = await fetch(`/api/top10companies?year=${encodeURIComponent(year)}`);
-      const payload = await r.json();
-      if (!payload.success) {
-        status.textContent = payload.message || 'Failed to load.'; status.classList.remove('loading'); status.classList.add('error'); return;
-      }
-      allData = Array.isArray(payload.data)? payload.data : [];
-      // populate category dropdown from data (dedupe)
-      const catSel = document.getElementById('category-input');
-      const cats = Array.from(new Set(allData.map(x => (x.category||'').trim()).filter(Boolean))).sort();
-      // Keep existing first option(s), then add unique categories
-      const keep = [...catSel.options].map(o=>o.value);
-      cats.forEach(c=>{
-        if (!keep.some(v => v.toLowerCase()===c.toLowerCase())){
-          const opt=document.createElement('option'); opt.value=c; opt.textContent=c; catSel.appendChild(opt);
-        }
-      });
-      filterAndRender();
-    } catch (e) {
-      console.error(e);
-      status.textContent = 'Error loading data.'; status.classList.remove('loading'); status.classList.add('error');
-    }
+  if (data.error_message) {
+    document.getElementById('errorMsg').textContent = data.error_message;
   }
-
-  // Wire controls
-  document.getElementById('state-select').addEventListener('change', filterAndRender);
-  document.getElementById('category-input').addEventListener('change', filterAndRender);
-  document.getElementById('time-select').addEventListener('change', loadTop10);
+}
+loadTopBrands();
 </script>
 </body>
 </html>

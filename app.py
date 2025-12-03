@@ -157,17 +157,33 @@ def create_app() -> Flask:
     # ======================================================
     # 🔹 DEWEY PROXY API
     # ======================================================
+        # ================= DEWEY PROXY API (with cache + auto fallback) =================
     @app.get("/api/top10companies")
     def api_top10companies():
+        """
+        Returns Top 10 brands (optionally filtered by ?year=) for the Top Brands UI.
+        Always shows something:
+          - Uses Dewey API if available
+          - If Dewey API fails, automatically falls back to CSV and includes an 'error_message' field
+        """
         year = request.args.get("year")
         dewey_url = os.getenv("DEWEY_API_URL")
         dewey_key = os.getenv("DEWEY_API_KEY")
 
         cache_key = f"proxy:{year or 'all'}"
         now = time.time()
-        if _dewey_cache["key"] == cache_key and (now - _dewey_cache["ts"] < _CACHE_TTL_SEC):
+        # Use in-memory cache (avoids reloading every request)
+        if (
+            _dewey_cache.get("key") == cache_key
+            and (now - _dewey_cache.get("ts", 0) < _CACHE_TTL_SEC)
+            and _dewey_cache.get("payload")
+        ):
             return jsonify({"success": True, "data": _dewey_cache["payload"]}), 200
 
+        data = []
+        error_message = None
+
+        # --- Try external Dewey API first ---
         if dewey_url:
             try:
                 params = {}
@@ -181,10 +197,10 @@ def create_app() -> Flask:
                 r.raise_for_status()
                 payload = r.json()
                 data = payload.get("data", payload)
-
                 if not isinstance(data, list):
-                    return jsonify({"success": False, "message": "Unexpected Dewey API shape"}), 502
+                    raise ValueError("Unexpected Dewey API response format")
 
+                # Normalize records
                 for row in data:
                     row.setdefault("brand_name", "")
                     row.setdefault("sector", "")
@@ -196,16 +212,29 @@ def create_app() -> Flask:
                         row["spend_amount"] = 0.0
 
                 _dewey_cache.update({"payload": data, "key": cache_key, "ts": now})
-                return jsonify({"success": True, "data": data}), 200
-            except requests.RequestException as e:
-                return jsonify({"success": False, "message": f"Dewey API error: {e}"}), 502
 
-        try:
-            data = _load_dewey_csv(year)
-            _dewey_cache.update({"payload": data, "key": cache_key, "ts": now})
-            return jsonify({"success": True, "data": data}), 200
-        except Exception as e:
-            return jsonify({"success": False, "message": f"CSV fallback error: {e}"}), 500
+            except Exception as e:
+                error_message = f"Dewey API error: {e}. Using local CSV fallback."
+                print("⚠️", error_message)
+
+        # --- Fallback to CSV if Dewey failed or returned nothing ---
+        if not data:
+            try:
+                data = _load_dewey_csv(year)
+                _dewey_cache.update({"payload": data, "key": cache_key, "ts": now})
+            except Exception as e:
+                return jsonify({
+                    "success": False,
+                    "message": f"Both Dewey API and CSV failed: {e}"
+                }), 500
+
+        # --- Always return something ---
+        return jsonify({
+            "success": True,
+            "data": data,
+            "error_message": error_message
+        }), 200
+
 
     return app
 
