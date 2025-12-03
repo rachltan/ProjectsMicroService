@@ -178,6 +178,7 @@ def create_app() -> Flask:
                 """
 
 
+
             df = pd.read_sql(query, conn)
             conn.close()
 
