@@ -99,6 +99,7 @@
 
           <button id="createBtn" class="btn btn-primary">Create Project</button>
           <div id="createMessage" class="message"></div>
+          <div id="autoFillNotice" class="message" style="display:none;"></div>
         </div>
 
         <!-- Access Project -->
@@ -130,7 +131,6 @@
             </div>
           </div>
 
-          <!-- Invisible holders for “current filters” (no DB change needed) -->
           <input id="currentState" type="hidden" />
           <input id="currentCategory" type="hidden" />
         </div>
@@ -141,26 +141,23 @@
 <script>
   const createMessage = document.getElementById('createMessage');
   const accessMessage = document.getElementById('accessMessage');
-
   const projectDetailsDiv = document.getElementById('projectDetails');
   const detailName = document.getElementById('detailName');
   const detailDesc = document.getElementById('detailDesc');
   const detailHardwareSummary = document.getElementById('detailHardwareSummary');
   const detailChecked = document.getElementById('detailChecked');
-
   const currentStateEl = document.getElementById('currentState');
   const currentCatEl = document.getElementById('currentCategory');
-
   const show = (el, text, kind) => { el.textContent = text; el.className = 'message ' + kind; el.style.display='block'; };
   const hide = (el) => { el.style.display = 'none'; };
 
-  // Create
+  // Create Project (with Dewey auto-fill display)
   document.getElementById('createBtn').addEventListener('click', async () => {
     hide(createMessage);
+    hide(document.getElementById('autoFillNotice'));
     const project_id = document.getElementById('newProjectId').value.trim();
     const project_name = document.getElementById('newProjectName').value.trim();
     const project_desc = document.getElementById('newProjectDesc').value.trim();
-    // Optional – just carried in URL later (not persisted)
     const target_state = document.getElementById('newTargetState').value;
     const target_category = document.getElementById('newTargetCategory').value.trim();
 
@@ -178,17 +175,27 @@
       const data = await resp.json();
       if (!resp.ok || !data.success) return show(createMessage, data.message || 'Failed to create project.', 'error');
 
-      // Save current “filters” in memory for the link button (no DB changes)
-      currentStateEl.value = target_state || '';
-      currentCatEl.value = target_category || '';
+      const created = data.project || {};
+      currentStateEl.value = created.target_state || target_state || '';
+      currentCatEl.value = created.target_category || target_category || '';
+
+      // Update visible inputs if backend enriched from Dewey
+      document.getElementById('newTargetState').value = currentStateEl.value;
+      document.getElementById('newTargetCategory').value = currentCatEl.value;
 
       show(createMessage, 'Project created successfully.', 'success');
-      document.getElementById('accessProjectId').value = project_id; // quick access
+      document.getElementById('accessProjectId').value = project_id;
+
+      // Optional: show Dewey auto-fill notice
+      if (created.target_state || created.target_category) {
+        const msg = `Auto-filled from Dewey Data: ${created.target_category || ''} in ${created.target_state || ''}`;
+        show(document.getElementById('autoFillNotice'), msg.trim(), 'success');
+      }
 
     } catch (e) { show(createMessage, 'Error calling /projects.', 'error'); }
   });
 
-  // Access
+  // Access Project
   document.getElementById('accessBtn').addEventListener('click', async () => {
     hide(accessMessage);
     projectDetailsDiv.style.display = 'none';
@@ -203,13 +210,10 @@
       const p = data.project || {};
       detailName.textContent = p.project_name || '';
       detailDesc.textContent = p.project_desc || '';
-
       const sets = Array.isArray(p.hardware_set_id) ? p.hardware_set_id : (p.hardware_set_id ? [String(p.hardware_set_id)] : []);
       detailHardwareSummary.textContent = sets.length ? sets.join(', ') : 'No hardware sets available';
-
       const n = typeof p.num_of_hardware_sets === 'number' ? p.num_of_hardware_sets : parseInt(p.num_of_hardware_sets || '0',10)||0;
       detailChecked.textContent = n;
-
       projectDetailsDiv.style.display='block';
     } catch { show(accessMessage, 'Error calling /projects.', 'error'); }
   });
@@ -221,18 +225,16 @@
     else alert('Hardware sets for this project:\n\n' + text);
   });
 
-  // “Open Top Brands” with auto-filter via URL (no schema change)
+  // Open Top Brands auto-filtered
   document.getElementById('openTopBrandsBtn').addEventListener('click', () => {
     const project_id = document.getElementById('accessProjectId').value.trim()
                       || document.getElementById('newProjectId').value.trim();
     const state = (currentStateEl.value || document.getElementById('newTargetState').value || '').trim();
     const category = (currentCatEl.value || document.getElementById('newTargetCategory').value || '').trim();
-
     const params = new URLSearchParams();
     if (project_id) params.set('project_id', project_id);
     if (state) params.set('state', state);
     if (category) params.set('category', category);
-
     window.location.href = '/top10companies' + (params.toString() ? ('?' + params.toString()) : '');
   });
 </script>
