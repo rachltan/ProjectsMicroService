@@ -118,8 +118,8 @@ def create_app():
 
     @app.route("/top10companies")
     def top10_page():
-        # Optional: reuse the same frontend for /top10companies path
-        return render_template("index.html")
+        return render_template("top10companies.html")
+
 
     return app
 
