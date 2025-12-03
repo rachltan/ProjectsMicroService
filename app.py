@@ -8,12 +8,16 @@ from flask_cors import CORS
 from projectdb import ProjectDB
 from project import Project
 
+
 def create_app() -> Flask:
     app = Flask(__name__, template_folder="templates", static_folder="static")
     CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=False)
 
+    # ======================================================
+    # 🔹 MongoDB Setup
+    # ======================================================
     mongo_uri = os.getenv("MONGO_URI")
-    mongo_db  = os.getenv("MONGO_DB", "projects_db")
+    mongo_db = os.getenv("MONGO_DB", "projects_db")
 
     print("🔍 Using Mongo URI:", mongo_uri)
     print("🔍 Using Mongo DB:", mongo_db)
@@ -25,9 +29,15 @@ def create_app() -> Flask:
         server_select_timeout_ms=15000,
     )
 
+    # ======================================================
+    # 🔹 Dewey Cache Setup
+    # ======================================================
     _dewey_cache = {"payload": None, "key": None, "ts": 0}
     _CACHE_TTL_SEC = 300
 
+    # ======================================================
+    # 🔹 Local Dewey CSV Loader
+    # ======================================================
     def _load_dewey_csv(year: str | None):
         csv_path = os.getenv("DEWEY_CSV_PATH", "data/stg_daily_spend_top10.csv")
         rows = []
@@ -50,6 +60,10 @@ def create_app() -> Flask:
 
         rows.sort(key=lambda x: x.get("spend_amount", 0), reverse=True)
         return rows[:10]
+
+    # ======================================================
+    # 🔹 Routes
+    # ======================================================
 
     @app.get("/")
     def root():
@@ -94,7 +108,7 @@ def create_app() -> Flask:
             params = {"year": "2025"}
             headers = {}
             if dewey_key:
-                headers["Authorization"] = f"Bearer {dewey_key}"            
+                headers["Authorization"] = f"Bearer {dewey_key}"
 
             data_rows = []
             if dewey_url:
@@ -125,6 +139,9 @@ def create_app() -> Flask:
         except Exception as e:
             return jsonify({"success": False, "message": str(e)}), 500
 
+    # ======================================================
+    # 🔹 PROJECT CRUD ROUTES
+    # ======================================================
     @app.get("/projects")
     def list_projects_route():
         limit = request.args.get("limit", type=int)
@@ -155,125 +172,120 @@ def create_app() -> Flask:
         return jsonify({"success": True, "message": "Project deleted"}), 200
 
     # ======================================================
-    # 🔹 DEWEY PROXY API
+    # 🔹 DEWEY PROXY API (with cache + auto fallback)
     # ======================================================
-        # ================= DEWEY PROXY API (with cache + auto fallback) =================
     @app.get("/api/top10companies")
-def api_top10companies():
-    """
-    Returns Top 10 brands (optionally filtered by ?year=) for the Top Brands UI.
+    def api_top10companies():
+        """
+        Returns Top 10 brands (optionally filtered by ?year=) for the Top Brands UI.
+        Data source priority:
+          1) Dewey API (live)
+          2) Local CSV fallback (data/stg_brand_detail.csv + data/stg_daily_spend_top10.csv)
+        """
 
-    Data source priority:
-      1) Dewey API (live)
-      2) Local CSV fallback (data/stg_brand_detail.csv + data/stg_daily_spend_top10.csv)
-    """
+        year = request.args.get("year")
+        dewey_url = os.getenv("DEWEY_API_URL")
+        dewey_key = os.getenv("DEWEY_API_KEY")
 
-    year = request.args.get("year")  # optional
-    dewey_url = os.getenv("DEWEY_API_URL")
-    dewey_key = os.getenv("DEWEY_API_KEY")
+        cache_key = f"proxy:{year or 'all'}"
+        now = time.time()
 
-    cache_key = f"proxy:{year or 'all'}"
-    now = time.time()
-    if _dewey_cache["key"] == cache_key and (now - _dewey_cache["ts"] < _CACHE_TTL_SEC):
-        return jsonify({"success": True, "data": _dewey_cache["payload"]}), 200
+        if _dewey_cache["key"] == cache_key and (now - _dewey_cache["ts"] < _CACHE_TTL_SEC):
+            return jsonify({"success": True, "data": _dewey_cache["payload"]}), 200
 
-    data = None
-    error_msg = None
+        data = None
+        error_msg = None
 
-    # -------- Try Dewey API first --------
-    if dewey_url:
-        try:
-            params = {}
-            if year:
-                params["year"] = year
-            headers = {}
-            if dewey_key:
-                headers["Authorization"] = f"Bearer {dewey_key}"
+        # Try Dewey API
+        if dewey_url:
+            try:
+                params = {}
+                if year:
+                    params["year"] = year
+                headers = {}
+                if dewey_key:
+                    headers["Authorization"] = f"Bearer {dewey_key}"
 
-            r = requests.get(dewey_url, params=params, headers=headers, timeout=10)
-            r.raise_for_status()
-            payload = r.json()
-            data = payload.get("data", payload)
-            if not isinstance(data, list):
-                raise ValueError("Unexpected Dewey API shape")
+                r = requests.get(dewey_url, params=params, headers=headers, timeout=10)
+                r.raise_for_status()
+                payload = r.json()
+                data = payload.get("data", payload)
+                if not isinstance(data, list):
+                    raise ValueError("Unexpected Dewey API shape")
 
-            # Normalize fields
-            for row in data:
-                row.setdefault("brand_name", "")
-                row.setdefault("sector", "")
-                row.setdefault("category", "")
-                row.setdefault("state", "")
-                try:
-                    row["spend_amount"] = float(row.get("spend_amount", 0) or 0)
-                except Exception:
-                    row["spend_amount"] = 0.0
-
-            _dewey_cache.update({"payload": data, "key": cache_key, "ts": now})
-
-        except Exception as e:
-            error_msg = f"Dewey API error: {e}"
-
-    # -------- Fallback: local CSVs --------
-    if not data:
-        try:
-            brand_meta_path = "data/stg_brand_detail.csv"
-            spend_path = "data/stg_daily_spend_top10.csv"
-
-            # Load brand metadata
-            brand_meta = {}
-            with open(brand_meta_path, newline="", encoding="utf-8") as f:
-                reader = csv.DictReader(f)
-                for row in reader:
-                    brand_name = row.get("brand_name") or row.get("Brand") or ""
-                    brand_meta[brand_name] = {
-                        "sector": row.get("sector", ""),
-                        "category": row.get("category", "")
-                    }
-
-            # Load spend data
-            rows = []
-            with open(spend_path, newline="", encoding="utf-8") as f:
-                reader = csv.DictReader(f)
-                for r in reader:
-                    if year and str(r.get("year", "")).strip() != str(year):
-                        continue
-                    brand_name = r.get("brand_name", "")
-                    meta = brand_meta.get(brand_name, {})
-                    row = {
-                        "brand_name": brand_name,
-                        "sector": meta.get("sector", ""),
-                        "category": meta.get("category", ""),
-                        "state": r.get("state", ""),
-                    }
+                for row in data:
+                    row.setdefault("brand_name", "")
+                    row.setdefault("sector", "")
+                    row.setdefault("category", "")
+                    row.setdefault("state", "")
                     try:
-                        row["spend_amount"] = float(r.get("spend_amount", 0) or 0)
+                        row["spend_amount"] = float(row.get("spend_amount", 0) or 0)
                     except Exception:
                         row["spend_amount"] = 0.0
-                    rows.append(row)
 
-            # Sort + take top 10
-            rows.sort(key=lambda x: x.get("spend_amount", 0), reverse=True)
-            data = rows[:10]
+                _dewey_cache.update({"payload": data, "key": cache_key, "ts": now})
 
-            _dewey_cache.update({"payload": data, "key": cache_key, "ts": now})
+            except Exception as e:
+                error_msg = f"Dewey API error: {e}"
 
-        except Exception as e:
-            error_msg = error_msg or f"CSV fallback error: {e}"
-            return jsonify({
-                "success": False,
-                "message": error_msg or "No data available"
-            }), 500
+        # Fallback: local CSVs
+        if not data:
+            try:
+                brand_meta_path = "data/stg_brand_detail.csv"
+                spend_path = "data/stg_daily_spend_top10.csv"
 
-    # -------- Always return something if possible --------
-    response = {"success": True, "data": data or []}
-    if error_msg:
-        response["warning"] = error_msg  # Shown in UI bottom message if needed
-    return jsonify(response), 200
+                brand_meta = {}
+                with open(brand_meta_path, newline="", encoding="utf-8") as f:
+                    reader = csv.DictReader(f)
+                    for row in reader:
+                        brand_name = row.get("brand_name") or row.get("Brand") or ""
+                        brand_meta[brand_name] = {
+                            "sector": row.get("sector", ""),
+                            "category": row.get("category", "")
+                        }
 
+                rows = []
+                with open(spend_path, newline="", encoding="utf-8") as f:
+                    reader = csv.DictReader(f)
+                    for r in reader:
+                        if year and str(r.get("year", "")).strip() != str(year):
+                            continue
+                        brand_name = r.get("brand_name", "")
+                        meta = brand_meta.get(brand_name, {})
+                        row = {
+                            "brand_name": brand_name,
+                            "sector": meta.get("sector", ""),
+                            "category": meta.get("category", ""),
+                            "state": r.get("state", ""),
+                        }
+                        try:
+                            row["spend_amount"] = float(r.get("spend_amount", 0) or 0)
+                        except Exception:
+                            row["spend_amount"] = 0.0
+                        rows.append(row)
 
+                rows.sort(key=lambda x: x.get("spend_amount", 0), reverse=True)
+                data = rows[:10]
+                _dewey_cache.update({"payload": data, "key": cache_key, "ts": now})
+
+            except Exception as e:
+                error_msg = error_msg or f"CSV fallback error: {e}"
+                return jsonify({
+                    "success": False,
+                    "message": error_msg or "No data available"
+                }), 500
+
+        response = {"success": True, "data": data or []}
+        if error_msg:
+            response["warning"] = error_msg
+        return jsonify(response), 200
 
     return app
 
+
+# ======================================================
+# 🔹 Gunicorn / Heroku Entrypoint
+# ======================================================
 app = create_app()
 
 if __name__ == "__main__":
