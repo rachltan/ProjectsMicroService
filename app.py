@@ -129,61 +129,61 @@ def create_app() -> Flask:
     # 🔹 TOP 10 BRANDS — simplified dbo query + fallback
     # ======================================================
     @app.get("/api/top10companies")
-def api_top10companies():
-    """
-    Returns Top 10 brands from dbo.top10monthly (Azure SQL)
-    Falls back to CSV if query fails.
-    """
-    cache_key = "azure_top10"
-    now = time.time()
-
-    # Use cache if valid
-    if _cache["key"] == cache_key and (now - _cache["ts"] < _CACHE_TTL_SEC):
-        return jsonify({"success": True, "data": _cache["payload"]}), 200
-
-    data = None
-    error_msg = None
-
-    try:
-        conn = get_azure_connection()
-        print("✅ Connected to Azure SQL")
-
-        query = """
-            SELECT TOP 10
-                brand_name,
-                total_spend AS spend_amount,
-                month_start_date
-            FROM dbo.top10monthly
-            ORDER BY monthly_rank ASC
+    def api_top10companies():
         """
-        df = pd.read_sql(query, conn)
-        conn.close()
+        Returns Top 10 brands from dbo.top10monthly (Azure SQL)
+        Falls back to CSV if query fails.
+        """
+        cache_key = "azure_top10"
+        now = time.time()
 
-        # If empty or bad shape, fall back
-        if df.empty:
-            raise ValueError("No data returned from Azure (table empty or permission issue).")
+        # Use cache if valid
+        if _cache["key"] == cache_key and (now - _cache["ts"] < _CACHE_TTL_SEC):
+            return jsonify({"success": True, "data": _cache["payload"]}), 200
 
-        print(f"📊 Retrieved {len(df)} rows from dbo.top10monthly")
-        data = df.to_dict(orient="records")
-        _cache.update({"payload": data, "key": cache_key, "ts": now})
+        data = None
+        error_msg = None
 
-    except Exception as e:
-        error_msg = f"⚠️ Azure SQL error or no data: {e}"
-        print(error_msg)
         try:
-            data = load_csv_fallback(None)
-            print(f"✅ Loaded {len(data)} rows from CSV fallback")
-        except Exception as fe:
-            return jsonify({
-                "success": False,
-                "message": f"CSV fallback failed: {fe}"
-            }), 500
+            conn = get_azure_connection()
+            print("✅ Connected to Azure SQL")
 
-    # Always return valid JSON
-    response = {"success": True, "data": data or []}
-    if error_msg:
-        response["warning"] = error_msg
-    return jsonify(response), 200
+            query = """
+                SELECT TOP 10
+                    brand_name,
+                    total_spend AS spend_amount,
+                    month_start_date
+                FROM dbo.top10monthly
+                ORDER BY monthly_rank ASC
+            """
+            df = pd.read_sql(query, conn)
+            conn.close()
+
+            # If empty or bad shape, fall back
+            if df.empty:
+                raise ValueError("No data returned from Azure (table empty or permission issue).")
+
+            print(f"📊 Retrieved {len(df)} rows from dbo.top10monthly")
+            data = df.to_dict(orient="records")
+            _cache.update({"payload": data, "key": cache_key, "ts": now})
+
+        except Exception as e:
+            error_msg = f"⚠️ Azure SQL error or no data: {e}"
+            print(error_msg)
+            try:
+                data = load_csv_fallback(None)
+                print(f"✅ Loaded {len(data)} rows from CSV fallback")
+            except Exception as fe:
+                return jsonify({
+                    "success": False,
+                    "message": f"CSV fallback failed: {fe}"
+                }), 500
+
+        # Always return valid JSON
+        response = {"success": True, "data": data or []}
+        if error_msg:
+            response["warning"] = error_msg
+        return jsonify(response), 200
 
 
     return app
