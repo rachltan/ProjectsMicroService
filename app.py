@@ -35,8 +35,6 @@ def create_app() -> Flask:
         database = os.getenv("AZURE_SQL_DATABASE", "MSITM_Project_Datbase")
         username = os.getenv("AZURE_SQL_USERNAME", "CloudSAffa4d29c")
         password = os.getenv("AZURE_SQL_PASSWORD", "Msitm1234%")
-
-        # pymssql uses host, user, password, database
         return pymssql.connect(server=server, user=username, password=password, database=database, port=1433)
 
     # ======================================================
@@ -87,7 +85,7 @@ def create_app() -> Flask:
         return render_template("top10companies.html")
 
     # ======================================================
-    # 🔹 PROJECT CREATION with Azure Autofill
+    # 🔹 PROJECT CREATION (same logic)
     # ======================================================
     @app.post("/projects")
     def create_project_route():
@@ -95,10 +93,7 @@ def create_app() -> Flask:
         project_id = (data.get("project_id") or "").strip()
         project_name = (data.get("project_name") or "").strip()
         if not project_id or not project_name:
-            return jsonify({
-                "success": False,
-                "message": "project_id and project_name are required"
-            }), 400
+            return jsonify({"success": False, "message": "project_id and project_name are required"}), 400
 
         payload = {
             "project_id": project_id,
@@ -109,9 +104,9 @@ def create_app() -> Flask:
         try:
             conn = get_azure_connection()
             query = """
-                SELECT TOP 1 bd.category, bd.sector
-                FROM ingest.stg_brand_detail bd
-                WHERE LOWER(bd.brand_name) LIKE %s
+                SELECT TOP 1 category, sector
+                FROM dbo.top10monthly
+                WHERE LOWER(brand_name) LIKE %s
             """
             df = pd.read_sql(query, conn, params=[f"%{project_name.lower()}%"])
             conn.close()
@@ -123,9 +118,7 @@ def create_app() -> Flask:
 
         try:
             proj_obj = Project.from_dict(payload) if hasattr(Project, "from_dict") else payload
-            created = project_db.create_project(
-                proj_obj.to_dict() if hasattr(proj_obj, "to_dict") else proj_obj
-            )
+            created = project_db.create_project(proj_obj.to_dict() if hasattr(proj_obj, "to_dict") else proj_obj)
             return jsonify({"success": True, "project": created}), 201
         except ValueError as ve:
             return jsonify({"success": False, "message": str(ve)}), 409
@@ -133,14 +126,10 @@ def create_app() -> Flask:
             return jsonify({"success": False, "message": str(e)}), 500
 
     # ======================================================
-    # 🔹 TOP 10 BRANDS — Azure Query with CSV Fallback
+    # 🔹 TOP 10 BRANDS — simplified dbo query + fallback
     # ======================================================
     @app.get("/api/top10companies")
     def api_top10companies():
-        """
-        Returns Top 10 brands (from dbo.top10monthly joined with ingest.stg_brand_detail)
-        """
-
         cache_key = "azure_top10"
         now = time.time()
 
@@ -152,37 +141,27 @@ def create_app() -> Flask:
 
         try:
             conn = get_azure_connection()
+            print("✅ Connected to Azure SQL")
 
-            # get most recent month dynamically
-            month_query = "SELECT MAX(month_start_date) AS latest_month FROM dbo.top10monthly"
-            month_df = pd.read_sql(month_query, conn)
-            latest_month = month_df.iloc[0]["latest_month"]
-
-            # query top 10 brands joined with brand detail
-            query = f"""
-                SELECT TOP 10 
-                    t.brand_name,
-                    b.sector,
-                    b.category,
-                    t.total_spend AS spend_amount,
-                    t.month_start_date
-                FROM dbo.top10monthly t
-                LEFT JOIN ingest.stg_brand_detail b
-                    ON t.brand_name = b.brand_name
-                WHERE t.month_start_date = %s
-                ORDER BY t.monthly_rank ASC
+            query = """
+                SELECT TOP 10
+                    brand_name,
+                    total_spend AS spend_amount,
+                    month_start_date
+                FROM dbo.top10monthly
+                ORDER BY monthly_rank ASC
             """
-
-            df = pd.read_sql(query, conn, params=[latest_month])
+            df = pd.read_sql(query, conn)
+            print(f"📊 Retrieved {len(df)} rows from dbo.top10monthly")
             conn.close()
             data = df.to_dict(orient="records")
-
             _cache.update({"payload": data, "key": cache_key, "ts": now})
-
         except Exception as e:
             error_msg = f"Azure SQL error: {e}"
+            print(error_msg)
             try:
                 data = load_csv_fallback(None)
+                print(f"✅ Loaded {len(data)} rows from CSV fallback")
             except Exception as fe:
                 return jsonify({"success": False, "message": f"CSV fallback failed: {fe}"}), 500
 
