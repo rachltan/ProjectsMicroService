@@ -2,6 +2,8 @@ import os
 import time
 import csv
 import requests
+import pyodbc
+import pandas as pd
 from urllib.parse import urlencode
 from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
@@ -29,42 +31,25 @@ def create_app() -> Flask:
         server_select_timeout_ms=15000,
     )
 
-    # ======================================================
-    # 🔹 Dewey Cache Setup
-    # ======================================================
     _dewey_cache = {"payload": None, "key": None, "ts": 0}
     _CACHE_TTL_SEC = 300
 
     # ======================================================
-    # 🔹 Local Dewey CSV Loader
+    # 🔹 Azure SQL Connection Helper
     # ======================================================
-    def _load_dewey_csv(year: str | None):
-        csv_path = os.getenv("DEWEY_CSV_PATH", "data/stg_daily_spend_top10.csv")
-        rows = []
-        with open(csv_path, newline="", encoding="utf-8") as f:
-            reader = csv.DictReader(f)
-            for r in reader:
-                if year and str(r.get("year", "")).strip() != str(year):
-                    continue
-                row = {
-                    "brand_name": r.get("brand_name", ""),
-                    "sector": r.get("sector", ""),
-                    "category": r.get("category", ""),
-                    "state": r.get("state", ""),
-                }
-                try:
-                    row["spend_amount"] = float(r.get("spend_amount", 0) or 0)
-                except Exception:
-                    row["spend_amount"] = 0.0
-                rows.append(row)
+    def get_azure_connection():
+        server = os.getenv("AZURE_SQL_SERVER")
+        database = os.getenv("AZURE_SQL_DATABASE")
+        username = os.getenv("AZURE_SQL_USERNAME")
+        password = os.getenv("AZURE_SQL_PASSWORD")
+        driver = "{ODBC Driver 18 for SQL Server}"
 
-        rows.sort(key=lambda x: x.get("spend_amount", 0), reverse=True)
-        return rows[:10]
+        conn_str = f"DRIVER={driver};SERVER={server};DATABASE={database};UID={username};PWD={password};Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;"
+        return pyodbc.connect(conn_str)
 
     # ======================================================
-    # 🔹 Routes
+    # 🔹 UI ROUTES
     # ======================================================
-
     @app.get("/")
     def root():
         return render_template("index.html")
@@ -82,7 +67,7 @@ def create_app() -> Flask:
             return jsonify({"status": "degraded", "mongo_error": str(e)}), 200
 
     # ======================================================
-    # 🔹 PROJECT CREATION with Dewey Auto-Fill Integration
+    # 🔹 PROJECT CREATION with optional Azure autofill
     # ======================================================
     @app.post("/projects")
     def create_project_route():
@@ -101,32 +86,21 @@ def create_app() -> Flask:
             "project_desc": (data.get("project_desc") or "").strip(),
         }
 
-        # 🧠 Try to auto-fill category/state from Dewey data
+        # Try to enrich with Azure brand info
         try:
-            dewey_url = os.getenv("DEWEY_API_URL")
-            dewey_key = os.getenv("DEWEY_API_KEY")
-            params = {"year": "2025"}
-            headers = {}
-            if dewey_key:
-                headers["Authorization"] = f"Bearer {dewey_key}"
-
-            data_rows = []
-            if dewey_url:
-                resp = requests.get(f"{dewey_url}?{urlencode(params)}", headers=headers, timeout=10)
-                if resp.ok:
-                    payload_json = resp.json()
-                    data_rows = payload_json.get("data", payload_json)
-            else:
-                data_rows = _load_dewey_csv("2025")
-
-            for row in data_rows:
-                brand = row.get("brand_name", "").lower()
-                if brand and project_name.lower() in brand:
-                    payload["target_state"] = row.get("state", "")
-                    payload["target_category"] = row.get("category", "")
-                    break
+            conn = get_azure_connection()
+            query = """
+                SELECT TOP 1 state, category
+                FROM dbo.TopBrands
+                WHERE LOWER(brand_name) LIKE ?
+            """
+            df = pd.read_sql(query, conn, params=[f"%{project_name.lower()}%"])
+            if not df.empty:
+                payload["target_state"] = df.iloc[0]["state"]
+                payload["target_category"] = df.iloc[0]["category"]
+            conn.close()
         except Exception as e:
-            print(f"⚠️ Dewey enrichment failed: {e}")
+            print(f"⚠️ Azure enrichment failed: {e}")
 
         try:
             proj_obj = Project.from_dict(payload) if hasattr(Project, "from_dict") else payload
@@ -172,22 +146,17 @@ def create_app() -> Flask:
         return jsonify({"success": True, "message": "Project deleted"}), 200
 
     # ======================================================
-    # 🔹 DEWEY PROXY API (with cache + auto fallback)
+    # 🔹 TOP BRANDS via Azure SQL (auto fallback to CSV)
     # ======================================================
     @app.get("/api/top10companies")
     def api_top10companies():
         """
-        Returns Top 10 brands (optionally filtered by ?year=) for the Top Brands UI.
-        Data source priority:
-          1) Dewey API (live)
-          2) Local CSV fallback (data/stg_brand_detail.csv + data/stg_daily_spend_top10.csv)
+        Returns Top 10 brands from Azure SQL.
+        Falls back to local CSVs if connection fails.
         """
 
         year = request.args.get("year")
-        dewey_url = os.getenv("DEWEY_API_URL")
-        dewey_key = os.getenv("DEWEY_API_KEY")
-
-        cache_key = f"proxy:{year or 'all'}"
+        cache_key = f"azure:{year or 'all'}"
         now = time.time()
 
         if _dewey_cache["key"] == cache_key and (now - _dewey_cache["ts"] < _CACHE_TTL_SEC):
@@ -196,40 +165,20 @@ def create_app() -> Flask:
         data = None
         error_msg = None
 
-        # Try Dewey API
-        if dewey_url:
-            try:
-                params = {}
-                if year:
-                    params["year"] = year
-                headers = {}
-                if dewey_key:
-                    headers["Authorization"] = f"Bearer {dewey_key}"
-
-                r = requests.get(dewey_url, params=params, headers=headers, timeout=10)
-                r.raise_for_status()
-                payload = r.json()
-                data = payload.get("data", payload)
-                if not isinstance(data, list):
-                    raise ValueError("Unexpected Dewey API shape")
-
-                for row in data:
-                    row.setdefault("brand_name", "")
-                    row.setdefault("sector", "")
-                    row.setdefault("category", "")
-                    row.setdefault("state", "")
-                    try:
-                        row["spend_amount"] = float(row.get("spend_amount", 0) or 0)
-                    except Exception:
-                        row["spend_amount"] = 0.0
-
-                _dewey_cache.update({"payload": data, "key": cache_key, "ts": now})
-
-            except Exception as e:
-                error_msg = f"Dewey API error: {e}"
-
-        # Fallback: local CSVs
-        if not data:
+        try:
+            conn = get_azure_connection()
+            query = """
+                SELECT TOP 10 brand_name, sector, category, state, spend_amount
+                FROM dbo.TopBrands
+                ORDER BY spend_amount DESC
+            """
+            df = pd.read_sql(query, conn)
+            data = df.to_dict(orient="records")
+            _dewey_cache.update({"payload": data, "key": cache_key, "ts": now})
+            conn.close()
+        except Exception as e:
+            error_msg = f"Azure SQL error: {e}"
+            # fallback to CSV
             try:
                 brand_meta_path = "data/stg_brand_detail.csv"
                 spend_path = "data/stg_daily_spend_top10.csv"
@@ -238,8 +187,7 @@ def create_app() -> Flask:
                 with open(brand_meta_path, newline="", encoding="utf-8") as f:
                     reader = csv.DictReader(f)
                     for row in reader:
-                        brand_name = row.get("brand_name") or row.get("Brand") or ""
-                        brand_meta[brand_name] = {
+                        brand_meta[row["brand_name"]] = {
                             "sector": row.get("sector", ""),
                             "category": row.get("category", "")
                         }
@@ -257,23 +205,15 @@ def create_app() -> Flask:
                             "sector": meta.get("sector", ""),
                             "category": meta.get("category", ""),
                             "state": r.get("state", ""),
+                            "spend_amount": float(r.get("spend_amount", 0) or 0)
                         }
-                        try:
-                            row["spend_amount"] = float(r.get("spend_amount", 0) or 0)
-                        except Exception:
-                            row["spend_amount"] = 0.0
                         rows.append(row)
 
-                rows.sort(key=lambda x: x.get("spend_amount", 0), reverse=True)
+                rows.sort(key=lambda x: x["spend_amount"], reverse=True)
                 data = rows[:10]
                 _dewey_cache.update({"payload": data, "key": cache_key, "ts": now})
-
-            except Exception as e:
-                error_msg = error_msg or f"CSV fallback error: {e}"
-                return jsonify({
-                    "success": False,
-                    "message": error_msg or "No data available"
-                }), 500
+            except Exception as fe:
+                return jsonify({"success": False, "message": f"CSV fallback failed: {fe}"}), 500
 
         response = {"success": True, "data": data or []}
         if error_msg:
