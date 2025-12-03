@@ -159,81 +159,117 @@ def create_app() -> Flask:
     # ======================================================
         # ================= DEWEY PROXY API (with cache + auto fallback) =================
     @app.get("/api/top10companies")
-    def api_top10companies():
-        """
-        Returns Top 10 brands (optionally filtered by ?year=) for the Top Brands UI.
-        Always shows something:
-          - Uses Dewey API if available
-          - If Dewey API fails, automatically falls back to CSV and includes an 'error_message' field
-        """
-        year = request.args.get("year")
-        dewey_url = os.getenv("DEWEY_API_URL")
-        dewey_key = os.getenv("DEWEY_API_KEY")
+def api_top10companies():
+    """
+    Returns Top 10 brands (optionally filtered by ?year=) for the Top Brands UI.
 
-        cache_key = f"proxy:{year or 'all'}"
-        now = time.time()
-        # Use in-memory cache (avoids reloading every request)
-        if (
-            _dewey_cache.get("key") == cache_key
-            and (now - _dewey_cache.get("ts", 0) < _CACHE_TTL_SEC)
-            and _dewey_cache.get("payload")
-        ):
-            return jsonify({"success": True, "data": _dewey_cache["payload"]}), 200
+    Data source priority:
+      1) Dewey API (live)
+      2) Local CSV fallback (data/stg_brand_detail.csv + data/stg_daily_spend_top10.csv)
+    """
 
-        data = []
-        error_message = None
+    year = request.args.get("year")  # optional
+    dewey_url = os.getenv("DEWEY_API_URL")
+    dewey_key = os.getenv("DEWEY_API_KEY")
 
-        # --- Try external Dewey API first ---
-        if dewey_url:
-            try:
-                params = {}
-                if year:
-                    params["year"] = year
-                headers = {}
-                if dewey_key:
-                    headers["Authorization"] = f"Bearer {dewey_key}"
+    cache_key = f"proxy:{year or 'all'}"
+    now = time.time()
+    if _dewey_cache["key"] == cache_key and (now - _dewey_cache["ts"] < _CACHE_TTL_SEC):
+        return jsonify({"success": True, "data": _dewey_cache["payload"]}), 200
 
-                r = requests.get(dewey_url, params=params, headers=headers, timeout=10)
-                r.raise_for_status()
-                payload = r.json()
-                data = payload.get("data", payload)
-                if not isinstance(data, list):
-                    raise ValueError("Unexpected Dewey API response format")
+    data = None
+    error_msg = None
 
-                # Normalize records
-                for row in data:
-                    row.setdefault("brand_name", "")
-                    row.setdefault("sector", "")
-                    row.setdefault("category", "")
-                    row.setdefault("state", "")
+    # -------- Try Dewey API first --------
+    if dewey_url:
+        try:
+            params = {}
+            if year:
+                params["year"] = year
+            headers = {}
+            if dewey_key:
+                headers["Authorization"] = f"Bearer {dewey_key}"
+
+            r = requests.get(dewey_url, params=params, headers=headers, timeout=10)
+            r.raise_for_status()
+            payload = r.json()
+            data = payload.get("data", payload)
+            if not isinstance(data, list):
+                raise ValueError("Unexpected Dewey API shape")
+
+            # Normalize fields
+            for row in data:
+                row.setdefault("brand_name", "")
+                row.setdefault("sector", "")
+                row.setdefault("category", "")
+                row.setdefault("state", "")
+                try:
+                    row["spend_amount"] = float(row.get("spend_amount", 0) or 0)
+                except Exception:
+                    row["spend_amount"] = 0.0
+
+            _dewey_cache.update({"payload": data, "key": cache_key, "ts": now})
+
+        except Exception as e:
+            error_msg = f"Dewey API error: {e}"
+
+    # -------- Fallback: local CSVs --------
+    if not data:
+        try:
+            brand_meta_path = "data/stg_brand_detail.csv"
+            spend_path = "data/stg_daily_spend_top10.csv"
+
+            # Load brand metadata
+            brand_meta = {}
+            with open(brand_meta_path, newline="", encoding="utf-8") as f:
+                reader = csv.DictReader(f)
+                for row in reader:
+                    brand_name = row.get("brand_name") or row.get("Brand") or ""
+                    brand_meta[brand_name] = {
+                        "sector": row.get("sector", ""),
+                        "category": row.get("category", "")
+                    }
+
+            # Load spend data
+            rows = []
+            with open(spend_path, newline="", encoding="utf-8") as f:
+                reader = csv.DictReader(f)
+                for r in reader:
+                    if year and str(r.get("year", "")).strip() != str(year):
+                        continue
+                    brand_name = r.get("brand_name", "")
+                    meta = brand_meta.get(brand_name, {})
+                    row = {
+                        "brand_name": brand_name,
+                        "sector": meta.get("sector", ""),
+                        "category": meta.get("category", ""),
+                        "state": r.get("state", ""),
+                    }
                     try:
-                        row["spend_amount"] = float(row.get("spend_amount", 0) or 0)
+                        row["spend_amount"] = float(r.get("spend_amount", 0) or 0)
                     except Exception:
                         row["spend_amount"] = 0.0
+                    rows.append(row)
 
-                _dewey_cache.update({"payload": data, "key": cache_key, "ts": now})
+            # Sort + take top 10
+            rows.sort(key=lambda x: x.get("spend_amount", 0), reverse=True)
+            data = rows[:10]
 
-            except Exception as e:
-                error_message = f"Dewey API error: {e}. Using local CSV fallback."
-                print("⚠️", error_message)
+            _dewey_cache.update({"payload": data, "key": cache_key, "ts": now})
 
-        # --- Fallback to CSV if Dewey failed or returned nothing ---
-        if not data:
-            try:
-                data = _load_dewey_csv(year)
-                _dewey_cache.update({"payload": data, "key": cache_key, "ts": now})
-            except Exception as e:
-                return jsonify({
-                    "success": False,
-                    "message": f"Both Dewey API and CSV failed: {e}"
-                }), 500
+        except Exception as e:
+            error_msg = error_msg or f"CSV fallback error: {e}"
+            return jsonify({
+                "success": False,
+                "message": error_msg or "No data available"
+            }), 500
 
-        # --- Always return something ---
-        return jsonify({
-            "success": True,
-            "data": data,
-            "error_message": error_message
-        }), 200
+    # -------- Always return something if possible --------
+    response = {"success": True, "data": data or []}
+    if error_msg:
+        response["warning"] = error_msg  # Shown in UI bottom message if needed
+    return jsonify(response), 200
+
 
 
     return app
