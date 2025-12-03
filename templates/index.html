@@ -6,220 +6,234 @@
 <title>Projects</title>
 <style>
   *{margin:0;padding:0;box-sizing:border-box}
-  body {
-    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-    background: linear-gradient(135deg,#7A6FD6 0%,#4F56C0 100%);
-    min-height:100vh; display:flex; align-items:flex-start; justify-content:center;
-    padding:40px;
+  body{
+    font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    background:linear-gradient(135deg,#7A6FD6 0%,#4F56C0 100%);
+    min-height:100vh;
   }
-  .container{
-    background:white; padding:36px; border-radius:16px;
-    box-shadow:0 20px 60px rgba(0,0,0,0.25);
-    width:100%; max-width:960px;
+  .shell{max-width:1100px;margin:40px auto;padding:0 24px}
+  .card{
+    background:#fff;border-radius:18px;padding:24px 28px;
+    box-shadow:0 18px 45px rgba(0,0,0,.12);
   }
-  h1{color:#333; font-size:26px; margin-bottom:24px}
-  .grid{display:grid; grid-template-columns:1fr 1fr; gap:24px}
-  .card{border:1px solid #eef; border-radius:14px; padding:18px}
-  .section-title{font-size:18px; font-weight:700; color:#333; margin-bottom:12px}
+  h1{font-size:28px;color:#222;margin-bottom:18px}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+  .section-title{font-size:18px;font-weight:700;color:#2b2e43;margin-bottom:10px}
   .form-group{margin-bottom:14px}
-  label{display:block; margin-bottom:6px; color:#555; font-weight:600; font-size:14px}
-  input, textarea, select{
-    width:100%; padding:10px; border:2px solid #e0e0e0; border-radius:10px;
-    font-size:15px; transition:border-color .2s;
+  label{display:block;font-weight:600;color:#374151;margin-bottom:6px;font-size:14px}
+  input,select,textarea{
+    width:100%;padding:12px 12px;border:1.5px solid #e0e3f0;border-radius:10px;
+    font-size:15px;outline:none
   }
-  input:focus, textarea:focus, select:focus{outline:none; border-color:#667eea}
-  textarea{min-height:72px; resize:vertical}
-  .row{display:flex; gap:12px}
+  input:focus,select:focus,textarea:focus{border-color:#5b6ff6;box-shadow:0 0 0 3px rgba(91,111,246,.1)}
+  textarea{min-height:90px;resize:vertical}
+  .row{display:flex;gap:14px}
   .row > *{flex:1}
-
-  button{
-    padding:12px 14px; width:100%;
-    background:linear-gradient(135deg,#667eea,#764ba2);
-    color:white; border:none; border-radius:10px; font-weight:700; cursor:pointer;
-    transition:transform .15s;
+  .btn{
+    appearance:none;border:0;border-radius:12px;padding:12px 16px;font-weight:700;
+    cursor:pointer
   }
-  button:hover{transform:translateY(-2px)}
-  .btn-secondary{background:linear-gradient(135deg,#4f9cff,#325fb3)}
-  .btn-ghost{
-    background:white; color:#4f5bd5; border:2px solid #cfd6ff;
-  }
-
-  .message{margin-top:10px; padding:10px; border-radius:10px; font-size:14px; display:none}
-  .message.success{background:#d4edda; color:#155724; border:1px solid #c3e6cb}
-  .message.error{background:#f8d7da; color:#721c24; border:1px solid #f5c6cb}
-
-  .details{margin-top:10px; font-size:14px; color:#333}
-  .details p{margin:6px 0}
+  .btn-primary{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff}
+  .btn-alt{background:#eef2ff;color:#374151;border:1px solid #d8ddff}
+  .message{display:none;margin-top:8px;padding:10px;border-radius:10px;font-size:14px;text-align:center}
+  .message.success{background:#e8fbf0;color:#155724;border:1px solid #b9ebc8}
+  .message.error{background:#fde8e8;color:#7f1d1d;border:1px solid #f5c2c2}
+  .project-details{margin-top:12px;color:#333;font-size:14px}
+  .project-details p{margin:4px 0}
 </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Projects</h1>
+  <div class="shell">
+    <div class="card">
+      <h1>Projects</h1>
 
-    <div class="grid">
-      <!-- CREATE -->
-      <div class="card">
-        <div class="section-title">Create New Project</div>
-        <div class="form-group">
-          <label for="newProjectId">Project ID</label>
-          <input id="newProjectId" placeholder="e.g. P1001" />
-        </div>
+      <div class="grid">
+        <!-- Create Project -->
+        <div>
+          <div class="section-title">Create New Project</div>
 
-        <div class="form-group">
-          <label for="newProjectName">Project Name</label>
-          <input id="newProjectName" placeholder="My Cool Project" />
-        </div>
-
-        <div class="row">
           <div class="form-group">
-            <label for="newState">Target State (optional)</label>
-            <select id="newState">
-              <option value="">All States</option>
-              <option value="AL">AL</option><option value="AK">AK</option><option value="AZ">AZ</option>
-              <option value="AR">AR</option><option value="CA">CA</option><option value="CO">CO</option>
-              <option value="CT">CT</option><option value="DE">DE</option><option value="FL">FL</option>
-              <option value="GA">GA</option><option value="HI">HI</option><option value="ID">ID</option>
-              <option value="IL">IL</option><option value="IN">IN</option><option value="IA">IA</option>
-              <option value="KS">KS</option><option value="KY">KY</option><option value="LA">LA</option>
-              <option value="ME">ME</option><option value="MD">MD</option><option value="MA">MA</option>
-              <option value="MI">MI</option><option value="MN">MN</option><option value="MS">MS</option>
-              <option value="MO">MO</option><option value="MT">MT</option><option value="NE">NE</option>
-              <option value="NV">NV</option><option value="NH">NH</option><option value="NJ">NJ</option>
-              <option value="NM">NM</option><option value="NY">NY</option><option value="NC">NC</option>
-              <option value="ND">ND</option><option value="OH">OH</option><option value="OK">OK</option>
-              <option value="OR">OR</option><option value="PA">PA</option><option value="RI">RI</option>
-              <option value="SC">SC</option><option value="SD">SD</option><option value="TN">TN</option>
-              <option value="TX">TX</option><option value="UT">UT</option><option value="VT">VT</option>
-              <option value="VA">VA</option><option value="WA">WA</option><option value="WV">WV</option>
-              <option value="WI">WI</option><option value="WY">WY</option>
-            </select>
+            <label for="newProjectId">Project ID</label>
+            <input id="newProjectId" placeholder="e.g. P1001" />
           </div>
+
           <div class="form-group">
-            <label for="newCategory">Target Category (optional)</label>
-            <input id="newCategory" placeholder="e.g., Grocery, Insurance" />
+            <label for="newProjectName">Project Name</label>
+            <input id="newProjectName" placeholder="My Cool Project" />
           </div>
+
+          <div class="row">
+            <div class="form-group">
+              <label for="newTargetState">Target State (optional)</label>
+              <select id="newTargetState">
+                <option value="">All States</option>
+                <option value="AL">AL</option><option value="AK">AK</option><option value="AZ">AZ</option>
+                <option value="AR">AR</option><option value="CA">CA</option><option value="CO">CO</option>
+                <option value="CT">CT</option><option value="DE">DE</option><option value="FL">FL</option>
+                <option value="GA">GA</option><option value="HI">HI</option><option value="ID">ID</option>
+                <option value="IL">IL</option><option value="IN">IN</option><option value="IA">IA</option>
+                <option value="KS">KS</option><option value="KY">KY</option><option value="LA">LA</option>
+                <option value="ME">ME</option><option value="MD">MD</option><option value="MA">MA</option>
+                <option value="MI">MI</option><option value="MN">MN</option><option value="MS">MS</option>
+                <option value="MO">MO</option><option value="MT">MT</option><option value="NE">NE</option>
+                <option value="NV">NV</option><option value="NH">NH</option><option value="NJ">NJ</option>
+                <option value="NM">NM</option><option value="NY">NY</option><option value="NC">NC</option>
+                <option value="ND">ND</option><option value="OH">OH</option><option value="OK">OK</option>
+                <option value="OR">OR</option><option value="PA">PA</option><option value="RI">RI</option>
+                <option value="SC">SC</option><option value="SD">SD</option><option value="TN">TN</option>
+                <option value="TX">TX</option><option value="UT">UT</option><option value="VT">VT</option>
+                <option value="VA">VA</option><option value="WA">WA</option><option value="WV">WV</option>
+                <option value="WI">WI</option><option value="WY">WY</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="newTargetCategory">Target Category (optional)</label>
+              <input id="newTargetCategory" placeholder="e.g., Grocery, Insurance" />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="newProjectDesc">Description</label>
+            <textarea id="newProjectDesc" placeholder="Short description (goals, timing, etc.)"></textarea>
+          </div>
+
+          <button id="createBtn" class="btn btn-primary">Create Project</button>
+          <div id="createMessage" class="message"></div>
         </div>
 
-        <div class="form-group">
-          <label for="newProjectDesc">Description</label>
-          <textarea id="newProjectDesc" placeholder="Short description (goals, timing, etc.)"></textarea>
-        </div>
+        <!-- Access Project -->
+        <div>
+          <div class="section-title">Access Existing Project</div>
 
-        <button id="createBtn" type="button">Create Project</button>
-        <div id="createMsg" class="message"></div>
-      </div>
+          <div class="form-group">
+            <label for="accessProjectId">Project ID</label>
+            <input id="accessProjectId" placeholder="Enter existing Project ID" />
+          </div>
 
-      <!-- ACCESS -->
-      <div class="card">
-        <div class="section-title">Access Existing Project</div>
-        <div class="form-group">
-          <label for="accessProjectId">Project ID</label>
-          <input id="accessProjectId" placeholder="Enter existing Project ID" />
-        </div>
+          <div class="row">
+            <button id="accessBtn" class="btn btn-primary">Access Project</button>
+            <button id="openTopBrandsBtn" class="btn btn-alt" title="Opens Top Brands with current filters">
+              Open Top Brands
+            </button>
+          </div>
 
-        <div class="row">
-          <button id="accessBtn" type="button" class="btn-secondary">Access Project</button>
-          <button id="openTopBrandsBtn" type="button" class="btn-ghost">Open Top Brands</button>
-        </div>
+          <div id="accessMessage" class="message"></div>
 
-        <div id="accessMsg" class="message"></div>
+          <div id="projectDetails" class="project-details" style="display:none;">
+            <p><strong>Project Name:</strong> <span id="detailName"></span></p>
+            <p><strong>Description:</strong> <span id="detailDesc"></span></p>
+            <p><strong>Hardware Sets:</strong> <span id="detailHardwareSummary"></span></p>
+            <p><strong>Checked Out:</strong> <span id="detailChecked"></span></p>
 
-        <div id="details" class="details" style="display:none;">
-          <p><strong>Name:</strong> <span id="dName"></span></p>
-          <p><strong>Description:</strong> <span id="dDesc"></span></p>
-          <p><strong>State:</strong> <span id="dState"></span></p>
-          <p><strong>Category:</strong> <span id="dCategory"></span></p>
-          <p><strong>Hardware Sets:</strong> <span id="dHw"></span></p>
-          <p><strong>Checked Out:</strong> <span id="dChecked"></span></p>
+            <div class="row" style="margin-top:8px">
+              <button id="hardwarePopupBtn" class="btn btn-alt">Show Hardware Sets</button>
+            </div>
+          </div>
+
+          <!-- Invisible holders for “current filters” (no DB change needed) -->
+          <input id="currentState" type="hidden" />
+          <input id="currentCategory" type="hidden" />
         </div>
       </div>
     </div>
   </div>
 
 <script>
-  const createBtn = document.getElementById('createBtn');
-  const accessBtn = document.getElementById('accessBtn');
-  const openTopBrandsBtn = document.getElementById('openTopBrandsBtn');
-  const createMsg = document.getElementById('createMsg');
-  const accessMsg = document.getElementById('accessMsg');
-  const details = document.getElementById('details');
+  const createMessage = document.getElementById('createMessage');
+  const accessMessage = document.getElementById('accessMessage');
 
-  let lastLoadedProject = null;
+  const projectDetailsDiv = document.getElementById('projectDetails');
+  const detailName = document.getElementById('detailName');
+  const detailDesc = document.getElementById('detailDesc');
+  const detailHardwareSummary = document.getElementById('detailHardwareSummary');
+  const detailChecked = document.getElementById('detailChecked');
 
-  function show(el, text, type){ el.textContent = text; el.className = 'message ' + type; el.style.display='block'; }
-  function hide(el){ el.style.display='none'; }
+  const currentStateEl = document.getElementById('currentState');
+  const currentCatEl = document.getElementById('currentCategory');
 
-  // CREATE
-  createBtn.addEventListener('click', async ()=> {
-    hide(createMsg);
-    const payload = {
-      project_id:   document.getElementById('newProjectId').value.trim(),
-      project_name: document.getElementById('newProjectName').value.trim(),
-      project_desc: document.getElementById('newProjectDesc').value.trim(),
-      state:        document.getElementById('newState').value,
-      category:     document.getElementById('newCategory').value.trim()
-    };
-    if(!payload.project_id || !payload.project_name){
-      show(createMsg, 'Project ID and Project Name are required.', 'error');
+  const show = (el, text, kind) => { el.textContent = text; el.className = 'message ' + kind; el.style.display='block'; };
+  const hide = (el) => { el.style.display = 'none'; };
+
+  // Create
+  document.getElementById('createBtn').addEventListener('click', async () => {
+    hide(createMessage);
+    const project_id = document.getElementById('newProjectId').value.trim();
+    const project_name = document.getElementById('newProjectName').value.trim();
+    const project_desc = document.getElementById('newProjectDesc').value.trim();
+    // Optional – just carried in URL later (not persisted)
+    const target_state = document.getElementById('newTargetState').value;
+    const target_category = document.getElementById('newTargetCategory').value.trim();
+
+    if (!project_id || !project_name) {
+      show(createMessage, 'Project ID and Project Name are required.', 'error');
       return;
     }
-    try{
-      const r = await fetch('/projects', {
-        method: 'POST',
-        headers: {'Content-Type':'application/json'},
-        body: JSON.stringify(payload)
+
+    try {
+      const resp = await fetch('/projects', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ project_id, project_name, project_desc })
       });
-      const data = await r.json();
-      if(!r.ok || !data.success) return show(createMsg, data.message || 'Failed to create project.', 'error');
-      show(createMsg, 'Project created.', 'success');
-    }catch(e){
-      show(createMsg, 'Error calling /projects.', 'error');
-    }
+      const data = await resp.json();
+      if (!resp.ok || !data.success) return show(createMessage, data.message || 'Failed to create project.', 'error');
+
+      // Save current “filters” in memory for the link button (no DB changes)
+      currentStateEl.value = target_state || '';
+      currentCatEl.value = target_category || '';
+
+      show(createMessage, 'Project created successfully.', 'success');
+      document.getElementById('accessProjectId').value = project_id; // quick access
+
+    } catch (e) { show(createMessage, 'Error calling /projects.', 'error'); }
   });
 
-  // ACCESS
-  accessBtn.addEventListener('click', async ()=> {
-    hide(accessMsg); details.style.display='none';
-    lastLoadedProject = null;
+  // Access
+  document.getElementById('accessBtn').addEventListener('click', async () => {
+    hide(accessMessage);
+    projectDetailsDiv.style.display = 'none';
+    const project_id = document.getElementById('accessProjectId').value.trim();
+    if (!project_id) return show(accessMessage, 'Please enter a Project ID.', 'error');
 
-    const pid = document.getElementById('accessProjectId').value.trim();
-    if(!pid) return show(accessMsg, 'Enter a Project ID.', 'error');
-
-    try{
-      const r = await fetch(`/projects/${encodeURIComponent(pid)}`);
-      const data = await r.json();
-      if(!r.ok || !data.success) return show(accessMsg, data.message || 'Project not found.', 'error');
+    try {
+      const resp = await fetch(`/projects/${encodeURIComponent(project_id)}`);
+      const data = await resp.json();
+      if (!resp.ok || !data.success) return show(accessMessage, data.message || 'Project not found.', 'error');
 
       const p = data.project || {};
-      lastLoadedProject = p;
+      detailName.textContent = p.project_name || '';
+      detailDesc.textContent = p.project_desc || '';
 
-      document.getElementById('dName').textContent = p.project_name || '';
-      document.getElementById('dDesc').textContent = p.project_desc || '';
-      document.getElementById('dState').textContent = p.state || '';
-      document.getElementById('dCategory').textContent = p.category || '';
+      const sets = Array.isArray(p.hardware_set_id) ? p.hardware_set_id : (p.hardware_set_id ? [String(p.hardware_set_id)] : []);
+      detailHardwareSummary.textContent = sets.length ? sets.join(', ') : 'No hardware sets available';
 
-      const hw = Array.isArray(p.hardware_set_id) ? p.hardware_set_id : (p.hardware_set_id ? [String(p.hardware_set_id)] : []);
-      document.getElementById('dHw').textContent = hw.length ? hw.join(', ') : 'None';
+      const n = typeof p.num_of_hardware_sets === 'number' ? p.num_of_hardware_sets : parseInt(p.num_of_hardware_sets || '0',10)||0;
+      detailChecked.textContent = n;
 
-      const checked = typeof p.num_of_hardware_sets === 'number' ? p.num_of_hardware_sets : parseInt(p.num_of_hardware_sets || '0',10) || 0;
-      document.getElementById('dChecked').textContent = checked;
-
-      details.style.display='block';
-    }catch(e){
-      show(accessMsg, 'Error calling /projects (get).', 'error');
-    }
+      projectDetailsDiv.style.display='block';
+    } catch { show(accessMessage, 'Error calling /projects.', 'error'); }
   });
 
-  // OPEN TOP BRANDS (prefill filters via query params)
-  openTopBrandsBtn.addEventListener('click', ()=>{
-    const pid = document.getElementById('accessProjectId').value.trim();
-    const st = lastLoadedProject?.state || '';
-    const cat = lastLoadedProject?.category || '';
-    const q = new URLSearchParams();
-    if(st)  q.set('state', st);
-    if(cat) q.set('category', cat);
-    const url = '/top10companies' + (q.toString() ? `?${q.toString()}` : '');
-    window.location.href = url;
+  // Hardware popup
+  document.getElementById('hardwarePopupBtn')?.addEventListener('click', () => {
+    const text = detailHardwareSummary.textContent || '';
+    if (!text || text === 'No hardware sets available') alert('No hardware sets associated with this project.');
+    else alert('Hardware sets for this project:\n\n' + text);
+  });
+
+  // “Open Top Brands” with auto-filter via URL (no schema change)
+  document.getElementById('openTopBrandsBtn').addEventListener('click', () => {
+    const project_id = document.getElementById('accessProjectId').value.trim()
+                      || document.getElementById('newProjectId').value.trim();
+    const state = (currentStateEl.value || document.getElementById('newTargetState').value || '').trim();
+    const category = (currentCatEl.value || document.getElementById('newTargetCategory').value || '').trim();
+
+    const params = new URLSearchParams();
+    if (project_id) params.set('project_id', project_id);
+    if (state) params.set('state', state);
+    if (category) params.set('category', category);
+
+    window.location.href = '/top10companies' + (params.toString() ? ('?' + params.toString()) : '');
   });
 </script>
 </body>

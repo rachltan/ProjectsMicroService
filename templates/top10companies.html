@@ -5,231 +5,72 @@
   <title>Top Brands by Consumer Spending</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <style>
-    body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: #f5f5f5;
-      margin: 0;
-      padding: 40px;
-    }
-    .card {
-      max-width: 960px;
-      margin: 0 auto;
-      background: #ffffff;
-      border-radius: 18px;
-      padding: 32px 36px 36px;
-      box-shadow: 0 18px 45px rgba(0, 0, 0, 0.12);
-    }
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      padding: 4px 10px;
-      border-radius: 999px;
-      background: #e3ebff;
-      color: #3955d3;
-      font-size: 12px;
-      font-weight: 600;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-      margin-bottom: 6px;
-    }
-    h1 {
-      margin: 0 0 4px;
-      font-size: 24px;
-      color: #222;
-    }
-    .subtitle {
-      margin: 0 0 20px;
-      font-size: 14px;
-      color: #666;
-      max-width: 640px;
-      line-height: 1.5;
-    }
-    .filters {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(180px, 1fr));
-      gap: 16px;
-      margin-bottom: 20px;
-    }
-    .filter-group {
-      display: flex;
-      flex-direction: column;
-      font-size: 13px;
-      color: #555;
-    }
-    .filter-group label {
-      margin-bottom: 4px;
-      font-weight: 600;
-    }
-    .filter-group select,
-    .filter-group input {
-      padding: 8px 10px;
-      border-radius: 8px;
-      border: 1px solid #d0d4e0;
-      font-size: 13px;
-      outline: none;
-      background: white;
-    }
-    .filter-group select:hover,
-    .filter-group input:hover {
-      border-color: #5b6ff6;
-    }
-    .filter-group select:focus,
-    .filter-group input:focus {
-      border-color: #5b6ff6;
-      box-shadow: 0 0 0 3px rgba(91, 111, 246, 0.1);
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 4px;
-      border-radius: 12px;
-      overflow: hidden;
-      font-size: 13px;
-    }
-    thead {
-      background: #f3f4ff;
-    }
-    th, td {
-      padding: 10px 12px;
-      text-align: left;
-    }
-    th {
-      font-size: 12px;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      color: #7a7fa0;
-      border-bottom: 1px solid #e0e3f0;
-    }
-    tbody tr:nth-child(even) {
-      background: #fafbff;
-    }
-    tbody tr:hover {
-      background: #eef2ff;
-    }
-    td.rank {
-      width: 40px;
-      text-align: center;
-      font-weight: 600;
-      color: #4b4f7a;
-    }
-    td.brand-name {
-      font-weight: 600;
-      color: #252742;
-    }
-    td.spend {
-      font-variant-numeric: tabular-nums;
-      text-align: right;
-      white-space: nowrap;
-    }
-    .table-footer {
-      margin-top: 10px;
-      font-size: 11px;
-      color: #888da8;
-    }
-    .footer-meta {
-      margin-top: 4px;
-      font-size: 11px;
-      color: #a0a4c0;
-    }
-    .back-button {
-      display: inline-flex;
-      align-items: center;
-      margin-top: 20px;
-      padding: 8px 14px;
-      border-radius: 999px;
-      background: #5b6ff6;
-      color: #ffffff;
-      font-size: 13px;
-      font-weight: 600;
-      text-decoration: none;
-      border: none;
-      cursor: pointer;
-    }
-    .back-button:hover {
-      background: #4657e0;
-    }
-    .status {
-      font-size: 12px;
-      margin-top: 8px;
-      color: #888;
-    }
-    .status.error {
-      color: #b3261e;
-    }
-    .status.loading {
-      color: #5b6ff6;
-    }
+    body{font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#f5f5f9;margin:0;padding:40px}
+    .card{max-width:1100px;margin:0 auto;background:#fff;border-radius:18px;padding:28px 32px 32px;box-shadow:0 18px 45px rgba(0,0,0,.12)}
+    .badge{display:inline-flex;align-items:center;padding:4px 10px;border-radius:999px;background:#e3ebff;color:#3955d3;font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;margin-bottom:6px}
+    h1{margin:0 0 4px;font-size:26px;color:#222}
+    .subtitle{margin:0 0 20px;font-size:14px;color:#666;max-width:680px;line-height:1.5}
+    .filters{display:flex;flex-wrap:wrap;gap:14px;margin-bottom:16px}
+    .filter-group{display:flex;flex-direction:column;font-size:13px;color:#555}
+    .filter-group label{margin-bottom:4px;font-weight:700}
+    .filter-group select{min-width:200px;padding:8px 10px;border-radius:10px;border:1px solid #d0d4e0;background:#fff;font-size:13px;outline:none}
+    table{width:100%;border-collapse:collapse;margin-top:6px;border-radius:12px;overflow:hidden;font-size:13px}
+    thead{background:#f3f4ff}
+    th,td{padding:10px 12px;text-align:left}
+    th{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:#7a7fa0;border-bottom:1px solid #e0e3f0}
+    tbody tr:nth-child(even){background:#fafbff}
+    tbody tr:hover{background:#eef2ff}
+    td.rank{width:40px;text-align:center;font-weight:700;color:#4b4f7a}
+    td.spend{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+    .footer{margin-top:10px;font-size:11px;color:#888da8}
+    .meta{margin-top:4px;font-size:11px;color:#a0a4c0}
+    .row{display:flex;gap:10px;align-items:center;margin-top:10px}
+    .btn{appearance:none;border:0;border-radius:999px;padding:8px 14px;font-weight:700;cursor:pointer}
+    .btn-back{background:#5b6ff6;color:#fff}
+    .status{font-size:12px;margin-top:8px;color:#888}
+    .status.error{color:#b3261e}
+    .status.loading{color:#5b6ff6}
   </style>
 </head>
 <body>
   <div class="card">
     <div class="badge">Dewey Data System</div>
     <h1>Top Brands by Consumer Spending</h1>
-    <p class="subtitle">
-      Rank brands across any sector based on total consumer spend over a selected time period.
-      Use this view to compare performance and prioritize resource allocation.
-    </p>
+    <p class="subtitle">Rank brands by consumer spend. You can deep-link here with <code>?state=TX&category=Grocery</code>.</p>
 
     <div class="filters">
-      <!-- State -->
       <div class="filter-group">
         <label for="state-select">State</label>
         <select id="state-select">
           <option value="">All States</option>
-          <option value="AL">Alabama (AL)</option>
-          <option value="AK">Alaska (AK)</option>
-          <option value="AZ">Arizona (AZ)</option>
-          <option value="AR">Arkansas (AR)</option>
-          <option value="CA">California (CA)</option>
-          <option value="CO">Colorado (CO)</option>
-          <option value="CT">Connecticut (CT)</option>
-          <option value="DE">Delaware (DE)</option>
-          <option value="FL">Florida (FL)</option>
-          <option value="GA">Georgia (GA)</option>
-          <option value="HI">Hawaii (HI)</option>
-          <option value="ID">Idaho (ID)</option>
-          <option value="IL">Illinois (IL)</option>
-          <option value="IN">Indiana (IN)</option>
-          <option value="IA">Iowa (IA)</option>
-          <option value="KS">Kansas (KS)</option>
-          <option value="KY">Kentucky (KY)</option>
-          <option value="LA">Louisiana (LA)</option>
-          <option value="ME">Maine (ME)</option>
-          <option value="MD">Maryland (MD)</option>
-          <option value="MA">Massachusetts (MA)</option>
-          <option value="MI">Michigan (MI)</option>
-          <option value="MN">Minnesota (MN)</option>
-          <option value="MS">Mississippi (MS)</option>
-          <option value="MO">Missouri (MO)</option>
-          <option value="MT">Montana (MT)</option>
-          <option value="NE">Nebraska (NE)</option>
-          <option value="NV">Nevada (NV)</option>
-          <option value="NH">New Hampshire (NH)</option>
-          <option value="NJ">New Jersey (NJ)</option>
-          <option value="NM">New Mexico (NM)</option>
-          <option value="NY">New York (NY)</option>
-          <option value="NC">North Carolina (NC)</option>
-          <option value="ND">North Dakota (ND)</option>
-          <option value="OH">Ohio (OH)</option>
-          <option value="OK">Oklahoma (OK)</option>
-          <option value="OR">Oregon (OR)</option>
-          <option value="PA">Pennsylvania (PA)</option>
-          <option value="RI">Rhode Island (RI)</option>
-          <option value="SC">South Carolina (SC)</option>
-          <option value="SD">South Dakota (SD)</option>
-          <option value="TN">Tennessee (TN)</option>
-          <option value="TX">Texas (TX)</option>
-          <option value="UT">Utah (UT)</option>
-          <option value="VT">Vermont (VT)</option>
-          <option value="VA">Virginia (VA)</option>
-          <option value="WA">Washington (WA)</option>
-          <option value="WV">West Virginia (WV)</option>
-          <option value="WI">Wisconsin (WI)</option>
-          <option value="WY">Wyoming (WY)</option>
+          <option value="AL">AL</option><option value="AK">AK</option><option value="AZ">AZ</option>
+          <option value="AR">AR</option><option value="CA">CA</option><option value="CO">CO</option>
+          <option value="CT">CT</option><option value="DE">DE</option><option value="FL">FL</option>
+          <option value="GA">GA</option><option value="HI">HI</option><option value="ID">ID</option>
+          <option value="IL">IL</option><option value="IN">IN</option><option value="IA">IA</option>
+          <option value="KS">KS</option><option value="KY">KY</option><option value="LA">LA</option>
+          <option value="ME">ME</option><option value="MD">MD</option><option value="MA">MA</option>
+          <option value="MI">MI</option><option value="MN">MN</option><option value="MS">MS</option>
+          <option value="MO">MO</option><option value="MT">MT</option><option value="NE">NE</option>
+          <option value="NV">NV</option><option value="NH">NH</option><option value="NJ">NJ</option>
+          <option value="NM">NM</option><option value="NY">NY</option><option value="NC">NC</option>
+          <option value="ND">ND</option><option value="OH">OH</option><option value="OK">OK</option>
+          <option value="OR">OR</option><option value="PA">PA</option><option value="RI">RI</option>
+          <option value="SC">SC</option><option value="SD">SD</option><option value="TN">TN</option>
+          <option value="TX">TX</option><option value="UT">UT</option><option value="VT">VT</option>
+          <option value="VA">VA</option><option value="WA">WA</option><option value="WV">WV</option>
+          <option value="WI">WI</option><option value="WY">WY</option>
         </select>
       </div>
 
-      <!-- Year -->
+      <div class="filter-group">
+        <label for="category-input">Category</label>
+        <select id="category-input">
+          <option value="">All Categories</option>
+          <!-- You can later add known categories. Free text below will also work. -->
+        </select>
+      </div>
+
       <div class="filter-group">
         <label for="time-select">Year</label>
         <select id="time-select">
@@ -239,181 +80,134 @@
           <option value="2022">2022</option>
         </select>
       </div>
-
-      <!-- Category (free text; prefilled from ?category=) -->
-      <div class="filter-group">
-        <label for="category-input">Category</label>
-        <input id="category-input" placeholder="e.g., Grocery, Insurance, QSR" />
-      </div>
     </div>
 
     <table>
       <thead>
         <tr>
-          <th>#</th>
-          <th>Brand</th>
-          <th>Sector</th>
-          <th>Category</th>
-          <th style="text-align:right;">Total Spend (USD)</th>
-          <th>State</th>
+          <th>#</th><th>Brand</th><th>Sector</th><th>Category</th>
+          <th style="text-align:right;">Total Spend (USD)</th><th>State</th>
         </tr>
       </thead>
-      <tbody id="top10-body">
-        <!-- rows injected by JavaScript -->
-      </tbody>
+      <tbody id="top10-body"></tbody>
     </table>
 
-    <div class="table-footer">
-      Data source: Dewey daily spend (brand × state). Updated weekly via Azure Data Factory.
-    </div>
-    <div class="footer-meta">
-      View powered by Dewey Data System microservice.
+    <div class="row">
+      <button class="btn btn-back" onclick="goBack()">⬅ Back to Dashboard</button>
+      <div id="status" class="status"></div>
     </div>
 
-    <button class="back-button" onclick="window.location.href='/'">
-      ⬅ Back to Dashboard
-    </button>
-
-    <div id="status" class="status"></div>
+    <div class="footer">Data source: Dewey daily spend (brand × state). Updated weekly via Azure Data Factory.</div>
+    <div class="meta">View powered by Dewey Data System microservice.</div>
   </div>
 
-  <script>
-    let allData = [];
+<script>
+  let allData = [];
+  const qs = new URLSearchParams(window.location.search);
+  const initialState = (qs.get('state') || '').toUpperCase();
+  const initialCategory = (qs.get('category') || '').trim();
+  const projectId = qs.get('project_id') || '';
 
-    function getParam(name) {
-      const url = new URL(window.location.href);
-      return url.searchParams.get(name) || "";
+  // Prefill selects from query string
+  document.addEventListener('DOMContentLoaded', () => {
+    if (initialState) {
+      const el = document.getElementById('state-select');
+      for (const o of el.options) if (o.value === initialState) o.selected = true;
     }
-
-    function formatCurrency(value) {
-      if (value == null || isNaN(value)) return "";
-      return Number(value).toLocaleString("en-US", {
-        style: "currency",
-        currency: "USD",
-        maximumFractionDigits: 2
-      });
-    }
-
-    function filterAndDisplayData() {
-      const selectedState = document.getElementById("state-select").value;
-      const selectedYear  = document.getElementById("time-select").value; // currently used only in the fetch
-      const categoryText  = document.getElementById("category-input").value.trim().toLowerCase();
-
-      // State + Category filtering (client-side)
-      let filteredData = allData.filter(row => {
-        if (selectedState && row.state !== selectedState) return false;
-        if (categoryText) {
-          const cat = (row.category || "").toLowerCase();
-          if (!cat.includes(categoryText)) return false;
-        }
-        return true;
-      });
-
-      // Sort by spend amount descending
-      filteredData.sort((a, b) => {
-        const spendA = typeof a.spend_amount === "number" ? a.spend_amount : parseFloat(a.spend_amount || 0);
-        const spendB = typeof b.spend_amount === "number" ? b.spend_amount : parseFloat(b.spend_amount || 0);
-        return spendB - spendA;
-      });
-
-      // Display top 10
-      const displayData = filteredData.slice(0, 10);
-      renderTable(displayData);
-
-      const statusEl = document.getElementById("status");
-      statusEl.textContent = `Showing top ${displayData.length} brands (${selectedYear}${selectedState ? ', ' + selectedState : ''}${categoryText ? ', category contains "' + categoryText + '"' : ''})`;
-      statusEl.classList.remove("error", "loading");
-    }
-
-    function renderTable(data) {
-      const tbody = document.getElementById("top10-body");
-      tbody.innerHTML = "";
-
-      if (data.length === 0) {
-        const tr = document.createElement("tr");
-        tr.innerHTML = '<td colspan="6" style="text-align:center;padding:20px;color:#888;">No data available for selected filters.</td>';
-        tbody.appendChild(tr);
-        return;
+    // category: if it's not in the dropdown yet, add it
+    if (initialCategory) {
+      const catSel = document.getElementById('category-input');
+      const exists = [...catSel.options].some(o => o.value.toLowerCase() === initialCategory.toLowerCase());
+      if (!exists) {
+        const opt = document.createElement('option');
+        opt.value = initialCategory; opt.textContent = initialCategory;
+        catSel.appendChild(opt);
       }
-
-      data.forEach((row, index) => {
-        const tr = document.createElement("tr");
-        const spend = typeof row.spend_amount === "number"
-          ? row.spend_amount
-          : parseFloat(row.spend_amount || 0);
-
-        tr.innerHTML = `
-          <td class="rank">${index + 1}</td>
-          <td class="brand-name">${row.brand_name || ""}</td>
-          <td>${row.sector || ""}</td>
-          <td>${row.category || ""}</td>
-          <td class="spend">${formatCurrency(spend)}</td>
-          <td>${row.state || ""}</td>
-        `;
-
-        tbody.appendChild(tr);
-      });
+      catSel.value = initialCategory;
     }
+    loadTop10();
+  });
 
-    async function loadTop10() {
-      const tbody = document.getElementById("top10-body");
-      const statusEl = document.getElementById("status");
-      tbody.innerHTML = "";
-      statusEl.textContent = "Loading top brands...";
-      statusEl.classList.add("loading");
+  function goBack(){ window.location.href = '/'; }
 
-      try {
-        const selectedYear = document.getElementById("time-select").value;
-        const response = await fetch(`/api/top10companies?year=${encodeURIComponent(selectedYear)}`);
-        const payload = await response.json();
+  function formatCurrency(v){
+    if (v == null || isNaN(v)) return '';
+    return Number(v).toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:2});
+  }
 
-        if (!payload.success) {
-          statusEl.textContent = payload.message || "Failed to load data.";
-          statusEl.classList.remove("loading");
-          statusEl.classList.add("error");
-          return;
-        }
+  function filterAndRender(){
+    const selState = document.getElementById('state-select').value;
+    const selCat = document.getElementById('category-input').value;
 
-        allData = Array.isArray(payload.data) ? payload.data : [];
-
-        if (allData.length === 0) {
-          statusEl.textContent = "No data available.";
-          statusEl.classList.remove("loading");
-          return;
-        }
-
-        filterAndDisplayData();
-
-      } catch (err) {
-        console.error("Failed to load /api/top10companies:", err);
-        const statusEl = document.getElementById("status");
-        statusEl.textContent = "Error loading data from /api/top10companies.";
-        statusEl.classList.remove("loading");
-        statusEl.classList.add("error");
-      }
-    }
-
-    // Prefill from query params (state, category), then load
-    document.addEventListener("DOMContentLoaded", () => {
-      const stateFromProject = getParam("state");     // e.g. 'TX'
-      const categoryFromProject = getParam("category"); // e.g. 'Grocery'
-
-      if (stateFromProject) {
-        const sel = document.getElementById("state-select");
-        if (sel) sel.value = stateFromProject;
-      }
-      if (categoryFromProject) {
-        const inp = document.getElementById("category-input");
-        if (inp) inp.value = categoryFromProject;
-      }
-
-      loadTop10();
+    let filtered = allData.filter(r => {
+      if (selState && r.state !== selState) return false;
+      if (selCat && String(r.category||'').toLowerCase() !== selCat.toLowerCase()) return false;
+      return true;
     });
 
-    // React to filter changes
-    document.getElementById("state-select").addEventListener("change", filterAndDisplayData);
-    document.getElementById("time-select").addEventListener("change", loadTop10);
-    document.getElementById("category-input").addEventListener("input", filterAndDisplayData);
-  </script>
+    // sort by spend desc
+    filtered.sort((a,b) => (Number(b.spend_amount)||0) - (Number(a.spend_amount)||0));
+
+    const display = filtered.slice(0,10);
+    const tbody = document.getElementById('top10-body');
+    tbody.innerHTML = '';
+    if (!display.length){
+      const tr = document.createElement('tr');
+      tr.innerHTML = '<td colspan="6" style="text-align:center;padding:20px;color:#888;">No data for selected filters.</td>';
+      tbody.appendChild(tr);
+    } else {
+      display.forEach((row,i)=>{
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td class="rank">${i+1}</td>
+          <td>${row.brand_name||''}</td>
+          <td>${row.sector||''}</td>
+          <td>${row.category||''}</td>
+          <td class="spend">${formatCurrency(row.spend_amount)}</td>
+          <td>${row.state||''}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    const status = document.getElementById('status');
+    status.textContent = `Showing top ${display.length} brands${projectId?` for Project ${projectId}`:''}${selState?` • ${selState}`:''}${selCat?` • ${selCat}`:''}`;
+    status.classList.remove('error','loading');
+  }
+
+  async function loadTop10(){
+    const status = document.getElementById('status');
+    status.textContent = 'Loading...'; status.classList.add('loading');
+
+    try {
+      const year = document.getElementById('time-select').value;
+      const r = await fetch(`/api/top10companies?year=${encodeURIComponent(year)}`);
+      const payload = await r.json();
+      if (!payload.success) {
+        status.textContent = payload.message || 'Failed to load.'; status.classList.remove('loading'); status.classList.add('error'); return;
+      }
+      allData = Array.isArray(payload.data)? payload.data : [];
+      // populate category dropdown from data (dedupe)
+      const catSel = document.getElementById('category-input');
+      const cats = Array.from(new Set(allData.map(x => (x.category||'').trim()).filter(Boolean))).sort();
+      // Keep existing first option(s), then add unique categories
+      const keep = [...catSel.options].map(o=>o.value);
+      cats.forEach(c=>{
+        if (!keep.some(v => v.toLowerCase()===c.toLowerCase())){
+          const opt=document.createElement('option'); opt.value=c; opt.textContent=c; catSel.appendChild(opt);
+        }
+      });
+      filterAndRender();
+    } catch (e) {
+      console.error(e);
+      status.textContent = 'Error loading data.'; status.classList.remove('loading'); status.classList.add('error');
+    }
+  }
+
+  // Wire controls
+  document.getElementById('state-select').addEventListener('change', filterAndRender);
+  document.getElementById('category-input').addEventListener('change', filterAndRender);
+  document.getElementById('time-select').addEventListener('change', loadTop10);
+</script>
 </body>
 </html>

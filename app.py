@@ -27,6 +27,11 @@ def create_app() -> Flask:
         server_select_timeout_ms=15000,
     )
 
+    @app.get("/top10companies")
+    def top10_page():
+        # Renders the Top Brands view; it will read ?state=&category= from the URL
+        return render_template("top10companies.html")
+
     # ============== UI PAGE ==============
     @app.get("/")
     def root():
