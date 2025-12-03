@@ -2,29 +2,22 @@ import os
 import time
 import csv
 import requests
+from urllib.parse import urlencode
 from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
 from projectdb import ProjectDB
 from project import Project
 
 def create_app() -> Flask:
-    app = Flask(
-        __name__,
-        template_folder="templates",
-        static_folder="static",
-    )
-
-    # CORS
+    app = Flask(__name__, template_folder="templates", static_folder="static")
     CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=False)
 
-    # --- Mongo config from env (Heroku Config Vars) ---
-    mongo_uri = os.getenv("MONGO_URI")            # e.g. mongodb+srv://user:pass@cluster/...
+    mongo_uri = os.getenv("MONGO_URI")
     mongo_db  = os.getenv("MONGO_DB", "projects_db")
 
     print("🔍 Using Mongo URI:", mongo_uri)
     print("🔍 Using Mongo DB:", mongo_db)
 
-    # Instantiate DB (param name is dbname)
     project_db = ProjectDB(
         uri=mongo_uri,
         dbname=mongo_db,
@@ -32,16 +25,10 @@ def create_app() -> Flask:
         server_select_timeout_ms=15000,
     )
 
-    # ------------- helpers for /api/top10companies -------------
     _dewey_cache = {"payload": None, "key": None, "ts": 0}
-    _CACHE_TTL_SEC = 300  # 5 minutes
+    _CACHE_TTL_SEC = 300
 
     def _load_dewey_csv(year: str | None):
-        """
-        Lightweight CSV fallback loader.
-        Expects a CSV with columns like: brand_name,sector,category,state,spend_amount,year
-        Path is configurable via DEWEY_CSV_PATH or defaults to data/stg_daily_spend_top10.csv
-        """
         csv_path = os.getenv("DEWEY_CSV_PATH", "data/stg_daily_spend_top10.csv")
         rows = []
         with open(csv_path, newline="", encoding="utf-8") as f:
@@ -49,7 +36,6 @@ def create_app() -> Flask:
             for r in reader:
                 if year and str(r.get("year", "")).strip() != str(year):
                     continue
-                # normalize
                 row = {
                     "brand_name": r.get("brand_name", ""),
                     "sector": r.get("sector", ""),
@@ -62,21 +48,17 @@ def create_app() -> Flask:
                     row["spend_amount"] = 0.0
                 rows.append(row)
 
-        # sort desc by spend, take top 10
         rows.sort(key=lambda x: x.get("spend_amount", 0), reverse=True)
         return rows[:10]
 
-    # ================= UI PAGES =================
     @app.get("/")
     def root():
         return render_template("index.html")
 
     @app.get("/top10companies")
     def top10_page():
-        # Renders the Top Brands view; it can read ?state=&category=&year= from the URL
         return render_template("top10companies.html")
 
-    # ================= HEALTH =================
     @app.get("/health")
     def health():
         try:
@@ -85,8 +67,9 @@ def create_app() -> Flask:
         except Exception as e:
             return jsonify({"status": "degraded", "mongo_error": str(e)}), 200
 
-    # ================= PROJECTS JSON API =================
-
+    # ======================================================
+    # 🔹 PROJECT CREATION with Dewey Auto-Fill Integration
+    # ======================================================
     @app.post("/projects")
     def create_project_route():
         data = request.get_json(force=True) or {}
@@ -103,6 +86,33 @@ def create_app() -> Flask:
             "project_name": project_name,
             "project_desc": (data.get("project_desc") or "").strip(),
         }
+
+        # 🧠 Try to auto-fill category/state from Dewey data
+        try:
+            dewey_url = os.getenv("DEWEY_API_URL")
+            dewey_key = os.getenv("DEWEY_API_KEY")
+            params = {"year": "2025"}
+            headers = {}
+            if dewey_key:
+                headers["Authorization"] = f"Bearer {dewey_key}"            
+
+            data_rows = []
+            if dewey_url:
+                resp = requests.get(f"{dewey_url}?{urlencode(params)}", headers=headers, timeout=10)
+                if resp.ok:
+                    payload_json = resp.json()
+                    data_rows = payload_json.get("data", payload_json)
+            else:
+                data_rows = _load_dewey_csv("2025")
+
+            for row in data_rows:
+                brand = row.get("brand_name", "").lower()
+                if brand and project_name.lower() in brand:
+                    payload["target_state"] = row.get("state", "")
+                    payload["target_category"] = row.get("category", "")
+                    break
+        except Exception as e:
+            print(f"⚠️ Dewey enrichment failed: {e}")
 
         try:
             proj_obj = Project.from_dict(payload) if hasattr(Project, "from_dict") else payload
@@ -144,29 +154,20 @@ def create_app() -> Flask:
             return jsonify({"success": False, "message": "Project not found"}), 404
         return jsonify({"success": True, "message": "Project deleted"}), 200
 
-    # ================= DEWEY PROXY API (with cache) =================
-
+    # ======================================================
+    # 🔹 DEWEY PROXY API
+    # ======================================================
     @app.get("/api/top10companies")
     def api_top10companies():
-        """
-        Returns Top 10 brands (optionally filtered by ?year=) for the Top Brands UI.
-
-        Data source priority:
-          1) If DEWEY_API_URL is set → proxy to external Dewey microservice (optional Authorization header via DEWEY_API_KEY)
-          2) Else → fallback to local CSV at DEWEY_CSV_PATH (default: data/stg_daily_spend_top10.csv)
-        """
-        year = request.args.get("year")  # optional
-
+        year = request.args.get("year")
         dewey_url = os.getenv("DEWEY_API_URL")
         dewey_key = os.getenv("DEWEY_API_KEY")
 
-        # simple in-memory cache per dyno
         cache_key = f"proxy:{year or 'all'}"
         now = time.time()
         if _dewey_cache["key"] == cache_key and (now - _dewey_cache["ts"] < _CACHE_TTL_SEC):
             return jsonify({"success": True, "data": _dewey_cache["payload"]}), 200
 
-        # Prefer external Dewey API
         if dewey_url:
             try:
                 params = {}
@@ -184,7 +185,6 @@ def create_app() -> Flask:
                 if not isinstance(data, list):
                     return jsonify({"success": False, "message": "Unexpected Dewey API shape"}), 502
 
-                # normalize
                 for row in data:
                     row.setdefault("brand_name", "")
                     row.setdefault("sector", "")
@@ -197,11 +197,9 @@ def create_app() -> Flask:
 
                 _dewey_cache.update({"payload": data, "key": cache_key, "ts": now})
                 return jsonify({"success": True, "data": data}), 200
-
             except requests.RequestException as e:
                 return jsonify({"success": False, "message": f"Dewey API error: {e}"}), 502
 
-        # CSV fallback
         try:
             data = _load_dewey_csv(year)
             _dewey_cache.update({"payload": data, "key": cache_key, "ts": now})
@@ -211,7 +209,6 @@ def create_app() -> Flask:
 
     return app
 
-# Gunicorn / Heroku
 app = create_app()
 
 if __name__ == "__main__":
