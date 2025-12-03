@@ -1,9 +1,8 @@
 import os
 import time
 import csv
-import pyodbc
+import pymssql
 import pandas as pd
-from urllib.parse import urlencode
 from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
 from projectdb import ProjectDB
@@ -23,28 +22,22 @@ def create_app() -> Flask:
     print("🔍 Using Mongo URI:", mongo_uri)
     print("🔍 Using Mongo DB:", mongo_db)
 
-    project_db = ProjectDB(
-        uri=mongo_uri,
-        dbname=mongo_db,
-        connect_timeout_ms=15000,
-        server_select_timeout_ms=15000,
-    )
+    project_db = ProjectDB(uri=mongo_uri, dbname=mongo_db)
 
     _cache = {"payload": None, "key": None, "ts": 0}
     _CACHE_TTL_SEC = 300
 
     # ======================================================
-    # 🔹 Azure SQL Connection
+    # 🔹 Azure SQL Connection (using pymssql)
     # ======================================================
     def get_azure_connection():
         server = os.getenv("AZURE_SQL_SERVER", "msitmproject.database.windows.net")
         database = os.getenv("AZURE_SQL_DATABASE", "MSITM_Project_Datbase")
         username = os.getenv("AZURE_SQL_USERNAME", "CloudSAffa4d29c")
         password = os.getenv("AZURE_SQL_PASSWORD", "Msitm1234%")
-        driver = "{ODBC Driver 18 for SQL Server}"
 
-        conn_str = f"DRIVER={driver};SERVER={server};DATABASE={database};UID={username};PWD={password};Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;"
-        return pyodbc.connect(conn_str)
+        # pymssql uses host, user, password, database
+        return pymssql.connect(server=server, user=username, password=password, database=database, port=1433)
 
     # ======================================================
     # 🔹 Local CSV Fallback Loader
@@ -118,7 +111,7 @@ def create_app() -> Flask:
             query = """
                 SELECT TOP 1 bd.category, bd.sector
                 FROM ingest.stg_brand_detail bd
-                WHERE LOWER(bd.brand_name) LIKE ?
+                WHERE LOWER(bd.brand_name) LIKE %s
             """
             df = pd.read_sql(query, conn, params=[f"%{project_name.lower()}%"])
             conn.close()
@@ -176,7 +169,7 @@ def create_app() -> Flask:
                 FROM dbo.top10monthly t
                 LEFT JOIN ingest.stg_brand_detail b
                     ON t.brand_name = b.brand_name
-                WHERE t.month_start_date = ?
+                WHERE t.month_start_date = %s
                 ORDER BY t.monthly_rank ASC
             """
 
