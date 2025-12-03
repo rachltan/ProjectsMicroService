@@ -21,6 +21,9 @@ def create_app() -> Flask:
     mongo_uri = os.getenv("MONGO_URI")            # e.g. mongodb+srv://user:pass@cluster/...
     mongo_db  = os.getenv("MONGO_DB", "projects_db")
 
+    print("🔍 Using Mongo URI:", mongo_uri)
+    print("🔍 Using Mongo DB:", mongo_db)
+
     # Instantiate DB (param name is dbname)
     project_db = ProjectDB(
         uri=mongo_uri,
