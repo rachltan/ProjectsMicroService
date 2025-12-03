@@ -156,6 +156,7 @@ def create_app() -> Flask:
                 FROM dbo.top10monthly
                 ORDER BY monthly_rank ASC
             """
+
             df = pd.read_sql(query, conn)
             conn.close()
 
