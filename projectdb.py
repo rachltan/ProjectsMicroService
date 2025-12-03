@@ -25,14 +25,15 @@ class ProjectDB:
         self.dbname = dbname
 
         if uri:
+            # Atlas SRV or standard URI
             self.client = MongoClient(
                 uri,
                 connectTimeoutMS=connect_timeout_ms,
                 serverSelectionTimeoutMS=server_select_timeout_ms,
-                tls=True  # harmless if implied by SRV
+                tls=True  # safe when SRV implies TLS; harmless otherwise
             )
         else:
-            # fallback to classic host/port (useful for local dev/docker)
+            # Fallback for local/docker
             host = host or os.getenv("MONGO_HOST", "localhost")
             port = port or int(os.getenv("MONGO_PORT", "27017"))
             username = username or os.getenv("MONGO_INITDB_ROOT_USERNAME")
@@ -49,6 +50,7 @@ class ProjectDB:
                 serverSelectionTimeoutMS=server_select_timeout_ms,
             )
 
+        # If your URI has no database path, we still use dbname explicitly:
         self.db = self.client[self.dbname]
         self.projects = self.db["projects"]
 
@@ -56,7 +58,7 @@ class ProjectDB:
         try:
             self.projects.create_index([("project_id", ASCENDING)], unique=True)
         except Exception:
-            # If server selection fails here, app.py /health will surface it
+            # If server selection fails here, /health will surface it
             pass
 
     # Quick connectivity check for /health
@@ -67,16 +69,16 @@ class ProjectDB:
     def create_project(self, doc: Dict[str, Any]) -> Dict[str, Any]:
         # Normalize canonical fields you use in the UI
         doc.setdefault("project_desc", "")
-        doc.setdefault("hardware_set_id", [])         # future-proof for your popup
+        doc.setdefault("hardware_set_id", [])         # future-proof for popup
         doc.setdefault("num_of_hardware_sets", 0)     # shown in details
 
         try:
             self.projects.insert_one(doc)
         except DuplicateKeyError:
-            # Replace with a friendlier message
+            # Duplicate project_id
             raise ValueError(f"project_id '{doc.get('project_id')}' already exists")
 
-        # return created (without _id for simpler frontend)
+        # Return the created record (without _id for a cleaner frontend)
         out = self.projects.find_one({"project_id": doc["project_id"]}, {"_id": False})
         return out or doc
 
