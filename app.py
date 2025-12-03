@@ -149,13 +149,28 @@ def create_app() -> Flask:
             print("✅ Connected to Azure SQL")
 
             query = """
+                WITH LatestMonth AS (
+                    SELECT MAX(month_start_date) AS latest_date
+                    FROM dbo.top10monthly
+                ),
+                Ranked AS (
+                    SELECT
+                        t.brand_name,
+                        t.total_spend AS spend_amount,
+                        t.month_start_date,
+                        ROW_NUMBER() OVER (PARTITION BY t.brand_name ORDER BY t.monthly_rank ASC) AS rn
+                    FROM dbo.top10monthly AS t
+                    CROSS JOIN LatestMonth AS lm
+                    WHERE t.month_start_date = lm.latest_date
+                )
                 SELECT TOP 10
                     brand_name,
-                    total_spend AS spend_amount,
+                    spend_amount,
                     month_start_date
-                FROM dbo.top10monthly
-                ORDER BY monthly_rank ASC
-            """
+                FROM Ranked
+                WHERE rn = 1
+                ORDER BY spend_amount DESC;
+                """
 
             df = pd.read_sql(query, conn)
             conn.close()
