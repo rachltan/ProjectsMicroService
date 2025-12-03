@@ -65,7 +65,7 @@ def create_app():
             b.sector,
             b.target_state
         FROM Ranked AS r
-        LEFT JOIN dbo.brand_detail AS b
+        LEFT JOIN ingest.stg_brand_detail AS b
             ON LOWER(r.brand_name) = LOWER(b.brand_name)
         WHERE r.rn = 1
         ORDER BY r.spend_amount DESC;
