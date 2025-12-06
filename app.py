@@ -1,8 +1,8 @@
 import os
 import pandas as pd
-from flask import Flask, jsonify, render_template
+from flask import Flask, jsonify, render_template, request
 from flask_cors import CORS
-from sqlalchemy import create_engine, text
+from pymongo import MongoClient
 
 # --------------------------------------------
 # Flask App Factory
@@ -12,27 +12,20 @@ def create_app():
     CORS(app)
 
     # ----------------------------------------
-    # Database Connection (Azure SQL)
+    # MongoDB Connection
     # ----------------------------------------
-    AZURE_SERVER = "msitmproject.database.windows.net"
-    AZURE_DATABASE = "MSITM_Project_Datbase"
-    AZURE_USERNAME = os.getenv("AZURE_USERNAME", "YOUR_USERNAME_HERE")  # replace if needed
-    AZURE_PASSWORD = os.getenv("AZURE_PASSWORD", "YOUR_PASSWORD_HERE")  # replace if needed
-
-    conn_str = (
-        f"mssql+pymssql://{AZURE_USERNAME}:{AZURE_PASSWORD}"
-        f"@{AZURE_SERVER}/{AZURE_DATABASE}"
+    MONGO_URI = os.getenv(
+        "MONGO_URI",
+        "mongodb+srv://<USERNAME>:<PASSWORD>@<CLUSTER>.mongodb.net/"
     )
-
-    # Create SQLAlchemy engine
-    try:
-        engine = create_engine(conn_str)
-    except Exception as e:
-        print(f"⚠️ Failed to initialize SQLAlchemy engine: {e}")
-        engine = None
+    client = MongoClient(MONGO_URI)
+    db = client["haasappprojectsdb"]   # your main MongoDB database name
+    projects_collection = db["Projects"]
+    hardware_collection = db["HardwareSet"]
+    users_collection = db["Users"]
 
     # ----------------------------------------
-    # Helper: Load fallback CSV data
+    # Helper: Load fallback CSV data (for top brands)
     # ----------------------------------------
     def load_csv_fallback():
         try:
@@ -56,61 +49,91 @@ def create_app():
             return []
 
     # ----------------------------------------
-    # API: Get Top 10 Companies by Spend
+    # ROUTE: Create Project
+    # ----------------------------------------
+    @app.route("/projects", methods=["POST"])
+    def create_project():
+        try:
+            data = request.get_json()
+            project_id = data.get("project_id")
+            project_name = data.get("project_name")
+            project_desc = data.get("project_desc", "")
+            target_state = data.get("target_state", "")
+            target_category = data.get("target_category", "")
+
+            if not project_id or not project_name:
+                return jsonify({
+                    "success": False,
+                    "message": "Project ID and Project Name are required."
+                }), 400
+
+            project_doc = {
+                "project_id": project_id,
+                "project_name": project_name,
+                "project_desc": project_desc,
+                "target_state": target_state,
+                "target_category": target_category,
+                "hardware_set_id": [],
+                "num_of_hardware_sets": 0
+            }
+
+            projects_collection.insert_one(project_doc)
+
+            return jsonify({
+                "success": True,
+                "project": project_doc
+            })
+        except Exception as e:
+            print(f"⚠️ Error creating project: {e}")
+            return jsonify({
+                "success": False,
+                "message": "Error creating project."
+            }), 500
+
+    # ----------------------------------------
+    # ROUTE: Get Project by ID
+    # ----------------------------------------
+    @app.route("/projects/<project_id>", methods=["GET"])
+    def get_project(project_id):
+        try:
+            project = projects_collection.find_one({"project_id": project_id}, {"_id": 0})
+            if not project:
+                return jsonify({
+                    "success": False,
+                    "message": "Project not found."
+                }), 404
+            return jsonify({
+                "success": True,
+                "project": project
+            })
+        except Exception as e:
+            print(f"⚠️ Error retrieving project: {e}")
+            return jsonify({
+                "success": False,
+                "message": "Error retrieving project."
+            }), 500
+
+    # ----------------------------------------
+    # ROUTE: Get Top 10 Companies (from CSV)
     # ----------------------------------------
     @app.route("/api/top10companies", methods=["GET"])
     def get_top10companies():
-        query = text("""
-        WITH LatestMonth AS (
-            SELECT MAX(month_start_date) AS latest_date
-            FROM dbo.top10monthly
-        ),
-        Ranked AS (
-            SELECT
-                t.brand_name,
-                t.total_spend AS spend_amount,
-                t.month_start_date,
-                ROW_NUMBER() OVER (PARTITION BY t.brand_name ORDER BY t.monthly_rank ASC) AS rn
-            FROM dbo.top10monthly AS t
-            CROSS JOIN LatestMonth AS lm
-            WHERE t.month_start_date = lm.latest_date
-        )
-        SELECT TOP 10
-            r.brand_name,
-            r.spend_amount,
-            r.month_start_date,
-            b.target_state,
-            b.sector,
-            b.category
-        FROM Ranked AS r
-        LEFT JOIN dbo.stg_brand_detail AS b
-            ON LOWER(r.brand_name) = LOWER(b.brand_name)
-        WHERE r.rn = 1
-        ORDER BY r.spend_amount DESC;
-        """)
-
         try:
-            if engine:
-                with engine.connect() as conn:
-                    df = pd.read_sql(query, conn)
-                    if df.empty:
-                        raise ValueError("Empty result set")
-                    df["source"] = "azure-sql"
-                    return jsonify(df.to_dict(orient="records"))
-            else:
-                raise ConnectionError("No active SQLAlchemy engine")
-
-        except Exception as e:
-            print(f"⚠️ Azure SQL connection failed: {e}")
-            fallback_data = load_csv_fallback()
+            data = load_csv_fallback()
             return jsonify({
-                "source": "csv-fallback",
-                "error": str(e),
-                "data": fallback_data
+                "success": True,
+                "data": data,
+                "source": "csv-fallback"
             })
+        except Exception as e:
+            print(f"⚠️ Error loading top10: {e}")
+            return jsonify({
+                "success": False,
+                "error": str(e)
+            }), 500
 
     # ----------------------------------------
-    # Frontend Routes (Templates)
+    # ROUTES: Frontend Pages
     # ----------------------------------------
     @app.route("/")
     def index():
@@ -119,7 +142,6 @@ def create_app():
     @app.route("/top10companies")
     def top10_page():
         return render_template("top10companies.html")
-
 
     return app
 
