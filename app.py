@@ -53,46 +53,30 @@ def create_app():
     # ----------------------------------------
     # ROUTE: Create Project
     # ----------------------------------------
-    @app.route("/projects", methods=["POST"])
-    def create_project():
-        try:
-            data = request.get_json()
-            project_id = data.get("project_id")
-            project_name = data.get("project_name")
-            project_desc = data.get("project_desc", "")
-            target_state = data.get("target_state", "")
-            target_category = data.get("target_category", "")
+    from bson import ObjectId
 
-            if not project_id or not project_name:
-                return jsonify({
-                    "success": False,
-                    "message": "Project ID and Project Name are required."
-                }), 400
+@app.route("/projects", methods=["POST"])
+def create_project():
+    try:
+        data = request.get_json()
+        result = projects_collection.insert_one(data)
+        inserted = projects_collection.find_one({"_id": result.inserted_id})
 
-            project_doc = {
-                "project_id": project_id,
-                "project_name": project_name,
-                "project_desc": project_desc,
-                "target_state": target_state,
-                "target_category": target_category,
-                "hardware_set_id": [],
-                "num_of_hardware_sets": 0
-            }
+        # Convert ObjectId → string for JSON
+        inserted["_id"] = str(inserted["_id"])
 
-            projects_collection.insert_one(project_doc)
+        return jsonify({
+            "success": True,
+            "project": inserted
+        }), 201
 
-            return jsonify({
-                "success": True,
-                "project": project_doc
-            })
-        except Exception as e:
-            import traceback
-            print("⚠️ Error creating project:", e)
-            traceback.print_exc()
-            return jsonify({
-                "success": False,
-                "message": f"Error creating project: {str(e)}"
-            }), 500
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify({
+            "success": False,
+            "message": f"Error creating project: {str(e)}"
+        }), 500
 
 
     # ----------------------------------------

@@ -6,6 +6,7 @@
 <title>Projects</title>
 <style>
   *{margin:0;padding:0;box-sizing:border-box}
+<<<<<<< HEAD
   body{
     font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
     background:linear-gradient(135deg,#7A6FD6 0%,#4F56C0 100%);
@@ -135,6 +136,133 @@
           <input id="currentCategory" type="hidden" />
         </div>
       </div>
+=======
+  body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: linear-gradient(135deg, #7A6FD6 0%, #4F56C0 100%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+  .container{
+    background:white;padding:40px;border-radius:16px;
+    box-shadow:0 20px 60px rgba(0,0,0,0.3);
+    width:100%;max-width:400px
+  }
+  h1{text-align:center;color:#333;margin-bottom:24px;font-size:26px}
+
+  .section-title{
+    font-size:18px;
+    font-weight:600;
+    color:#333;
+    margin-bottom:10px;
+  }
+
+  .form-group{margin-bottom:16px}
+  label{display:block;margin-bottom:6px;color:#555;font-weight:500}
+  input, textarea{
+    width:100%;padding:10px;border:2px solid #e0e0e0;
+    border-radius:8px;font-size:15px;transition:border-color .3s;
+    font-family:inherit;
+  }
+  input:focus, textarea:focus{outline:none;border-color:#667eea}
+  textarea{min-height:70px;resize:vertical}
+
+  button{
+    width:100%;padding:12px;
+    background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+    color:white;border:none;border-radius:8px;
+    font-size:15px;font-weight:600;cursor:pointer;
+    transition:transform .2s;margin-top:4px
+  }
+  button:hover{transform:translateY(-2px)}
+  button:active{transform:translateY(0)}
+
+  .sub-button{
+    margin-top:10px;
+    background:linear-gradient(135deg,#4f9cff 0%,#325fb3 100%);
+  }
+
+  .message{
+    padding:10px;border-radius:8px;margin-bottom:14px;
+    text-align:center;display:none;font-size:14px;
+  }
+  .message.success{
+    background:#d4edda;color:#155724;border:1px solid #c3e6cb
+  }
+  .message.error{
+    background:#f8d7da;color:#721c24;border:1px solid #f5c6cb
+  }
+
+  .divider{
+    height:1px;
+    background:#e3e3e3;
+    margin:20px 0;
+  }
+
+  .project-details{
+    margin-top:8px;font-size:14px;color:#333;
+  }
+  .project-details p{
+    margin:4px 0;
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+    <h1>Projects</h1>
+
+    <!-- GLOBAL MESSAGE (for quick feedback) -->
+    <div id="globalMessage" class="message"></div>
+
+    <!-- ===== CREATE NEW PROJECT ===== -->
+    <div>
+      <div class="section-title">Create New Project</div>
+
+      <div class="form-group">
+        <label for="newProjectId">Project ID</label>
+        <input id="newProjectId" placeholder="e.g. P1001" />
+      </div>
+
+      <div class="form-group">
+        <label for="newProjectName">Project Name</label>
+        <input id="newProjectName" placeholder="My Cool Project" />
+      </div>
+
+      <div class="form-group">
+        <label for="newProjectDesc">Description</label>
+        <textarea id="newProjectDesc" placeholder="Short description"></textarea>
+      </div>
+
+      <button id="createBtn" type="button">Create Project</button>
+      <div id="createMessage" class="message"></div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- ===== ACCESS EXISTING PROJECT ===== -->
+    <div>
+      <div class="section-title">Access Existing Project</div>
+
+      <div class="form-group">
+        <label for="accessProjectId">Project ID</label>
+        <input id="accessProjectId" placeholder="Enter existing Project ID" />
+      </div>
+
+      <button id="accessBtn" type="button">Access Project</button>
+      <div id="accessMessage" class="message"></div>
+
+      <div id="projectDetails" class="project-details" style="display:none;">
+        <p><strong>Project Name:</strong> <span id="detailName"></span></p>
+        <p><strong>Description:</strong> <span id="detailDesc"></span></p>
+        <p><strong>Hardware Sets:</strong> <span id="detailHardwareSummary"></span></p>
+        <p><strong>Checked Out:</strong> <span id="detailChecked"></span></p>
+
+        <button id="hardwarePopupBtn" type="button" class="sub-button">
+          Show Hardware Sets
+        </button>
+      </div>
+>>>>>>> parent of 66954b3 (widen)
     </div>
   </div>
 
@@ -166,6 +294,15 @@
       return;
     }
 
+<<<<<<< HEAD
+=======
+    const payload = {
+      project_id,
+      project_name,
+      project_desc
+    };
+
+>>>>>>> parent of 66954b3 (widen)
     try {
       const resp = await fetch('/projects', {
         method:'POST',
@@ -210,12 +347,38 @@
       const p = data.project || {};
       detailName.textContent = p.project_name || '';
       detailDesc.textContent = p.project_desc || '';
+<<<<<<< HEAD
       const sets = Array.isArray(p.hardware_set_id) ? p.hardware_set_id : (p.hardware_set_id ? [String(p.hardware_set_id)] : []);
       detailHardwareSummary.textContent = sets.length ? sets.join(', ') : 'No hardware sets available';
       const n = typeof p.num_of_hardware_sets === 'number' ? p.num_of_hardware_sets : parseInt(p.num_of_hardware_sets || '0',10)||0;
       detailChecked.textContent = n;
       projectDetailsDiv.style.display='block';
     } catch { show(accessMessage, 'Error calling /projects.', 'error'); }
+=======
+
+      // hardware_set_id may be array or string
+      currentHardwareSets = Array.isArray(p.hardware_set_id)
+        ? p.hardware_set_id
+        : (p.hardware_set_id ? [String(p.hardware_set_id)] : []);
+
+      if (currentHardwareSets.length === 0) {
+        detailHardwareSummary.textContent = 'No hardware sets available';
+      } else {
+        detailHardwareSummary.textContent = currentHardwareSets.join(', ');
+      }
+
+      const checked = typeof p.num_of_hardware_sets === 'number'
+        ? p.num_of_hardware_sets
+        : parseInt(p.num_of_hardware_sets || '0', 10) || 0;
+      detailChecked.textContent = checked;
+
+      projectDetailsDiv.style.display = 'block';
+
+    } catch (err) {
+      console.error(err);
+      showMessage(accessMessage, 'Error calling /projects (get).', 'error');
+    }
+>>>>>>> parent of 66954b3 (widen)
   });
 
   // Hardware popup
