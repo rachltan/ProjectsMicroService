@@ -1,4 +1,4 @@
-version: '3.9'
+version: "3.9"
 
 services:
   mongo-auth:
@@ -24,9 +24,12 @@ services:
       - .env
     depends_on:
       - mongo-auth
+    volumes:
+      - .:/app                # ✅ Mount your local code into container for live updates
     environment:
-      - FLASK_ENV=production
+      - FLASK_ENV=development  # ✅ Enables live reload
       - PORT=2000
+    command: python app.py     # ✅ Run directly with Python instead of gunicorn for dev
 
 volumes:
   mongo-data:
