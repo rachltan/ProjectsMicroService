@@ -1,38 +1,23 @@
-# -----------------------------------
-# Stage 1: Base image
-# -----------------------------------
-FROM python:3.11-slim
+# Dockerfile
+FROM python:3.10-slim
 
-# Prevent Python from writing pyc files to disk & buffering stdout
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
-
-# -----------------------------------
-# Stage 2: Working directory setup
-# -----------------------------------
+# Set working directory
 WORKDIR /app
 
-# Copy requirements and install dependencies
-COPY requirements.txt .
+# Install system dependencies (if you need build tools)
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends gcc \
+    && rm -rf /var/lib/apt/lists/*
 
-# Install dependencies (use no-cache to keep image small)
+# Copy & install Python dependencies
+COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the rest of the app
+# Copy app sources
 COPY . .
 
-# -----------------------------------
-# Stage 3: Environment setup
-# -----------------------------------
-# Flask env vars
-ENV FLASK_APP=app.py
-ENV FLASK_RUN_HOST=0.0.0.0
-ENV FLASK_ENV=production
+# Expose port
+EXPOSE 2000
 
-# Expose port 5000 for Flask
-EXPOSE 5000
-
-# -----------------------------------
-# Stage 4: Run the app
-# -----------------------------------
+# Run the Flask app
 CMD ["python", "app.py"]

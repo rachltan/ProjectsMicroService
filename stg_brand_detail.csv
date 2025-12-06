@@ -1,0 +1,11 @@
+BRAND_NAME,BRAND_ID,SUBINDUSTRY_ID,SUBINDUSTRY_NAME,INDUSTRY_NAME,BRAND_URL_ADDR,BRAND_TYPE,load_batch_id,ingested_at_utc
+& OTHER STORIES,13255,2003,Fast Fashion,"Apparel, Accessories & Footwear",www.stories.com,MAIN,37cf9160-6927-4d56-8ce3-28a342115648,2025-11-12 17:47:36.832025
+&PIZZA,16254,2085,Fast Casual Dining,Limited-Service Restaurants,www.andpizza.com,MAIN,04983da6-2e7e-432a-a9e4-9bd463d46942,2025-11-12 17:47:36.832025
+1 800 ANYLENS,22825,2133,Eyewear Retail,Health Products/Services,www.1800anylens.com,MAIN,73c0d65a-ccd0-4186-b526-547eceb8ef03,2025-11-12 17:47:36.832025
+1 HOTELS,32215,2121,Lodging,Travel,www.1hotels.com,MAIN,839a9209-4a0a-44cc-8489-d04d544d5760,2025-11-12 17:47:36.832025
+1 STOP (EX FUEL),23354,2022,Convenience/Gas,Convenience/Drug/Diet,,MAIN,0efc39fb-4c2e-410c-a9e4-5d5ab0080f20,2025-11-12 17:47:36.832025
+1 STOP (FUEL),29463,2022,Convenience/Gas,Convenience/Drug/Diet,https://www.gpminvestments.com/about-us/,MAIN,27841d1c-89b4-4e3a-bea9-8e1efb2c99a1,2025-11-12 17:47:36.832025
+1 STOP BEDROOMS,16979,2066,Home Furnishings,Home & Garden,www.1stopbedrooms.com,MAIN,b416de2f-cb2f-44bf-971b-ee24eb3daa6c,2025-11-12 17:47:36.832025
+1 STOP LIGHTING,20165,2066,Home Furnishings,Home & Garden,www.1stoplighting.com,MAIN,de90e8e9-add9-443b-b63f-e6fd33b2324b,2025-11-12 17:47:36.832025
+1&1 MAIL & MEDIA,27009,2117,Telecom,Telecom & Media,www.mail-and-media.com,MAIN,845913c2-29a7-4b1c-8293-09de2059b361,2025-11-12 17:47:36.832025
+1-800 CONTACTS,10001,2133,Eyewear Retail,Health Products/Services,www.1800contacts.com,MAIN,8c142046-8e56-4f0d-8609-c4d1b41a2aa6,2025-11-12 17:47:36.832025

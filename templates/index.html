@@ -5,367 +5,421 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Projects</title>
 <style>
-  *{margin:0;padding:0;box-sizing:border-box}
-<<<<<<< HEAD
-<<<<<<< HEAD
-  body{
-    font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-    background:linear-gradient(135deg,#7A6FD6 0%,#4F56C0 100%);
-    min-height:100vh;
-  }
-  .shell{max-width:1100px;margin:40px auto;padding:0 24px}
-  .card{
-    background:#fff;border-radius:18px;padding:24px 28px;
-    box-shadow:0 18px 45px rgba(0,0,0,.12);
-  }
-  h1{font-size:28px;color:#222;margin-bottom:18px}
-  .grid{display:grid;grid-template-columns:1fr 1fr;gap:24px}
-  .section-title{font-size:18px;font-weight:700;color:#2b2e43;margin-bottom:10px}
-  .form-group{margin-bottom:14px}
-  label{display:block;font-weight:600;color:#374151;margin-bottom:6px;font-size:14px}
-  input,select,textarea{
-    width:100%;padding:12px 12px;border:1.5px solid #e0e3f0;border-radius:10px;
-    font-size:15px;outline:none
-  }
-  input:focus,select:focus,textarea:focus{border-color:#5b6ff6;box-shadow:0 0 0 3px rgba(91,111,246,.1)}
-  textarea{min-height:90px;resize:vertical}
-  .row{display:flex;gap:14px}
-  .row > *{flex:1}
-  .btn{
-    appearance:none;border:0;border-radius:12px;padding:12px 16px;font-weight:700;
-    cursor:pointer
-  }
-  .btn-primary{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff}
-  .btn-alt{background:#eef2ff;color:#374151;border:1px solid #d8ddff}
-  .message{display:none;margin-top:8px;padding:10px;border-radius:10px;font-size:14px;text-align:center}
-  .message.success{background:#e8fbf0;color:#155724;border:1px solid #b9ebc8}
-  .message.error{background:#fde8e8;color:#7f1d1d;border:1px solid #f5c2c2}
-  .project-details{margin-top:12px;color:#333;font-size:14px}
-  .project-details p{margin:4px 0}
-</style>
-</head>
-<body>
-  <div class="shell">
-    <div class="card">
-      <h1>Projects</h1>
+  * { margin:0; padding:0; box-sizing:border-box; }
 
-      <div class="grid">
-        <!-- Create Project -->
-        <div>
-          <div class="section-title">Create New Project</div>
-
-          <div class="form-group">
-            <label for="newProjectId">Project ID</label>
-            <input id="newProjectId" placeholder="e.g. P1001" />
-          </div>
-
-          <div class="form-group">
-            <label for="newProjectName">Project Name</label>
-            <input id="newProjectName" placeholder="My Cool Project" />
-          </div>
-
-          <div class="row">
-            <div class="form-group">
-              <label for="newTargetState">Target State (optional)</label>
-              <select id="newTargetState">
-                <option value="">All States</option>
-                <option value="AL">AL</option><option value="AK">AK</option><option value="AZ">AZ</option>
-                <option value="AR">AR</option><option value="CA">CA</option><option value="CO">CO</option>
-                <option value="CT">CT</option><option value="DE">DE</option><option value="FL">FL</option>
-                <option value="GA">GA</option><option value="HI">HI</option><option value="ID">ID</option>
-                <option value="IL">IL</option><option value="IN">IN</option><option value="IA">IA</option>
-                <option value="KS">KS</option><option value="KY">KY</option><option value="LA">LA</option>
-                <option value="ME">ME</option><option value="MD">MD</option><option value="MA">MA</option>
-                <option value="MI">MI</option><option value="MN">MN</option><option value="MS">MS</option>
-                <option value="MO">MO</option><option value="MT">MT</option><option value="NE">NE</option>
-                <option value="NV">NV</option><option value="NH">NH</option><option value="NJ">NJ</option>
-                <option value="NM">NM</option><option value="NY">NY</option><option value="NC">NC</option>
-                <option value="ND">ND</option><option value="OH">OH</option><option value="OK">OK</option>
-                <option value="OR">OR</option><option value="PA">PA</option><option value="RI">RI</option>
-                <option value="SC">SC</option><option value="SD">SD</option><option value="TN">TN</option>
-                <option value="TX">TX</option><option value="UT">UT</option><option value="VT">VT</option>
-                <option value="VA">VA</option><option value="WA">WA</option><option value="WV">WV</option>
-                <option value="WI">WI</option><option value="WY">WY</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="newTargetCategory">Target Category (optional)</label>
-              <input id="newTargetCategory" placeholder="e.g., Grocery, Insurance" />
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label for="newProjectDesc">Description</label>
-            <textarea id="newProjectDesc" placeholder="Short description (goals, timing, etc.)"></textarea>
-          </div>
-
-          <button id="createBtn" class="btn btn-primary">Create Project</button>
-          <div id="createMessage" class="message"></div>
-          <div id="autoFillNotice" class="message" style="display:none;"></div>
-        </div>
-
-        <!-- Access Project -->
-        <div>
-          <div class="section-title">Access Existing Project</div>
-
-          <div class="form-group">
-            <label for="accessProjectId">Project ID</label>
-            <input id="accessProjectId" placeholder="Enter existing Project ID" />
-          </div>
-
-          <div class="row">
-            <button id="accessBtn" class="btn btn-primary">Access Project</button>
-            <button id="openTopBrandsBtn" class="btn btn-alt" title="Opens Top Brands with current filters">
-              Open Top Brands
-            </button>
-          </div>
-
-          <div id="accessMessage" class="message"></div>
-
-          <div id="projectDetails" class="project-details" style="display:none;">
-            <p><strong>Project Name:</strong> <span id="detailName"></span></p>
-            <p><strong>Description:</strong> <span id="detailDesc"></span></p>
-            <p><strong>Hardware Sets:</strong> <span id="detailHardwareSummary"></span></p>
-            <p><strong>Checked Out:</strong> <span id="detailChecked"></span></p>
-
-            <div class="row" style="margin-top:8px">
-              <button id="hardwarePopupBtn" class="btn btn-alt">Show Hardware Sets</button>
-            </div>
-          </div>
-
-          <input id="currentState" type="hidden" />
-          <input id="currentCategory" type="hidden" />
-        </div>
-      </div>
-=======
-=======
->>>>>>> parent of 66954b3 (widen)
   body {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  background: linear-gradient(135deg, #7A6FD6 0%, #4F56C0 100%);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-  .container{
-    background:white;padding:40px;border-radius:16px;
-    box-shadow:0 20px 60px rgba(0,0,0,0.3);
-    width:100%;max-width:400px
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: linear-gradient(135deg, #7A6FD6 0%, #4F56C0 100%);
+    min-height: 100vh;
   }
-  h1{text-align:center;color:#333;margin-bottom:24px;font-size:26px}
 
-  .section-title{
+  .page-wrap {
+    max-width: 1100px;
+    margin: 30px auto 40px auto;
+    padding: 0 16px;
+  }
+
+  /* ===== TOP BAR (like hardware page) ===== */
+  .top-bar {
+    background: #ffffff;
+    border-radius: 18px;
+    padding: 16px 24px;
+    box-shadow: 0 14px 40px rgba(0,0,0,0.18);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+  }
+
+  .top-bar-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .top-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: #333;
+  }
+
+  .top-sub {
+    font-size: 13px;
+    color: #666;
+  }
+
+  .top-bar-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+  }
+
+  .top-bar-right span {
+    color: #555;
+  }
+
+  .top-bar-right span strong {
+    font-weight: 600;
+  }
+
+  .btn-chip {
+    padding: 8px 14px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .btn-dashboard {
+    background: #4f9cff;
+    color: #fff;
+  }
+
+  .btn-dashboard:hover {
+    background: #356fd0;
+  }
+
+  .btn-logout {
+    background: #e03b3b;
+    color: #fff;
+  }
+
+  .btn-logout:hover {
+    background: #b32626;
+  }
+
+  /* ===== MAIN CARD ===== */
+  .container {
+    background: #ffffff;
+    padding: 28px 32px 32px;
+    border-radius: 18px;
+    box-shadow: 0 18px 50px rgba(0,0,0,0.22);
+    width: 100%;
+  }
+
+  h1 {
+    text-align:left;
+    color:#333;
+    margin-bottom:18px;
+    font-size:24px;
+  }
+
+  .subtitle {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 24px;
+  }
+
+  .layout-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+  }
+
+  .panel {
+    flex: 1;
+    min-width: 260px;
+  }
+
+  .panel-inner {
+    border-radius: 12px;
+    border: 1px solid #ececec;
+    padding: 18px 18px 20px;
+    background: #fafbff;
+  }
+
+  .section-title {
     font-size:18px;
     font-weight:600;
     color:#333;
-    margin-bottom:10px;
+    margin-bottom:14px;
   }
 
-  .form-group{margin-bottom:16px}
-  label{display:block;margin-bottom:6px;color:#555;font-weight:500}
-  input, textarea{
-    width:100%;padding:10px;border:2px solid #e0e0e0;
-    border-radius:8px;font-size:15px;transition:border-color .3s;
+  .form-group { margin-bottom:14px; }
+
+  label {
+    display:block;
+    margin-bottom:6px;
+    color:#555;
+    font-weight:500;
+    font-size:14px;
+  }
+
+  input, textarea {
+    width:100%;
+    padding:10px;
+    border:2px solid #e0e0e0;
+    border-radius:8px;
+    font-size:15px;
+    transition:border-color .3s;
     font-family:inherit;
   }
-  input:focus, textarea:focus{outline:none;border-color:#667eea}
-  textarea{min-height:70px;resize:vertical}
 
-  button{
-    width:100%;padding:12px;
-    background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
-    color:white;border:none;border-radius:8px;
-    font-size:15px;font-weight:600;cursor:pointer;
-    transition:transform .2s;margin-top:4px
+  input:focus, textarea:focus {
+    outline:none;
+    border-color:#667eea;
   }
-  button:hover{transform:translateY(-2px)}
-  button:active{transform:translateY(0)}
 
-  .sub-button{
+  textarea {
+    min-height:80px;
+    resize:vertical;
+  }
+
+  button {
+    width:100%;
+    padding:12px;
+    background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+    color:white;
+    border:none;
+    border-radius:8px;
+    font-size:15px;
+    font-weight:600;
+    cursor:pointer;
+    transition:transform .2s, box-shadow .2s;
+    margin-top:4px;
+  }
+
+  button:hover {
+    transform:translateY(-1px);
+    box-shadow:0 8px 18px rgba(0,0,0,0.18);
+  }
+
+  button:active {
+    transform:translateY(0);
+    box-shadow:none;
+  }
+
+  .sub-button {
     margin-top:10px;
     background:linear-gradient(135deg,#4f9cff 0%,#325fb3 100%);
   }
 
-  .message{
-    padding:10px;border-radius:8px;margin-bottom:14px;
-    text-align:center;display:none;font-size:14px;
-  }
-  .message.success{
-    background:#d4edda;color:#155724;border:1px solid #c3e6cb
-  }
-  .message.error{
-    background:#f8d7da;color:#721c24;border:1px solid #f5c6cb
+  .message {
+    padding:10px;
+    border-radius:8px;
+    margin-top:10px;
+    text-align:left;
+    display:none;
+    font-size:13px;
   }
 
-  .divider{
-    height:1px;
-    background:#e3e3e3;
-    margin:20px 0;
+  .message.success {
+    background:#d4edda;
+    color:#155724;
+    border:1px solid #c3e6cb;
   }
 
-  .project-details{
-    margin-top:8px;font-size:14px;color:#333;
+  .message.error {
+    background:#f8d7da;
+    color:#721c24;
+    border:1px solid #f5c6cb;
   }
-  .project-details p{
+
+  .project-details {
+    margin-top:10px;
+    font-size:14px;
+    color:#333;
+  }
+
+  .project-details p {
     margin:4px 0;
+  }
+
+  @media (max-width: 720px) {
+    .top-bar {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
+    }
+    .top-bar-right {
+      align-self: stretch;
+      justify-content: space-between;
+    }
   }
 </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Projects</h1>
-
-    <!-- GLOBAL MESSAGE (for quick feedback) -->
-    <div id="globalMessage" class="message"></div>
-
-    <!-- ===== CREATE NEW PROJECT ===== -->
-    <div>
-      <div class="section-title">Create New Project</div>
-
-      <div class="form-group">
-        <label for="newProjectId">Project ID</label>
-        <input id="newProjectId" placeholder="e.g. P1001" />
+  <div class="page-wrap">
+    <!-- HEADER BAR -->
+    <div class="top-bar">
+      <div class="top-bar-left">
+        <span style="font-size:22px;">🧩</span>
+        <div>
+          <div class="top-title">Project Management</div>
+          <div class="top-sub">Create and access projects tied to hardware resources.</div>
+        </div>
       </div>
-
-      <div class="form-group">
-        <label for="newProjectName">Project Name</label>
-        <input id="newProjectName" placeholder="My Cool Project" />
+      <div class="top-bar-right">
+        <span>Welcome, <strong>Guest</strong></span>
+        <span>Project: <strong>None Selected</strong></span>
+        <a href="/" class="btn-chip btn-dashboard">← Dashboard</a>
+        <button type="button" class="btn-chip btn-logout">Logout</button>
       </div>
-
-      <div class="form-group">
-        <label for="newProjectDesc">Description</label>
-        <textarea id="newProjectDesc" placeholder="Short description"></textarea>
-      </div>
-
-      <button id="createBtn" type="button">Create Project</button>
-      <div id="createMessage" class="message"></div>
     </div>
 
-    <div class="divider"></div>
+    <!-- MAIN CARD -->
+    <div class="container">
+      <h1>Projects</h1>
+      <p class="subtitle">
+        Create a new project or quickly look up an existing one by Project ID, then view its
+        associated hardware sets.
+      </p>
 
-    <!-- ===== ACCESS EXISTING PROJECT ===== -->
-    <div>
-      <div class="section-title">Access Existing Project</div>
+      <!-- GLOBAL MESSAGE (for quick feedback) -->
+      <div id="globalMessage" class="message"></div>
 
-      <div class="form-group">
-        <label for="accessProjectId">Project ID</label>
-        <input id="accessProjectId" placeholder="Enter existing Project ID" />
+      <div class="layout-row">
+        <!-- ===== CREATE NEW PROJECT ===== -->
+        <div class="panel">
+          <div class="panel-inner">
+            <div class="section-title">Create New Project</div>
+
+            <div class="form-group">
+              <label for="newProjectId">Project ID</label>
+              <input id="newProjectId" placeholder="e.g. P1001" />
+            </div>
+
+            <div class="form-group">
+              <label for="newProjectName">Project Name</label>
+              <input id="newProjectName" placeholder="My Cool Project" />
+            </div>
+
+            <div class="form-group">
+              <label for="newProjectDesc">Description</label>
+              <textarea id="newProjectDesc" placeholder="Short description"></textarea>
+            </div>
+
+            <button id="createBtn" type="button">Create Project</button>
+            <div id="createMessage" class="message"></div>
+          </div>
+        </div>
+
+        <!-- ===== ACCESS EXISTING PROJECT ===== -->
+        <div class="panel">
+          <div class="panel-inner">
+            <div class="section-title">Access Existing Project</div>
+
+            <div class="form-group">
+              <label for="accessProjectId">Project ID</label>
+              <input id="accessProjectId" placeholder="Enter existing Project ID" />
+            </div>
+
+            <button id="accessBtn" type="button">Access Project</button>
+            <div id="accessMessage" class="message"></div>
+
+            <div id="projectDetails" class="project-details" style="display:none;">
+              <p><strong>Project Name:</strong> <span id="detailName"></span></p>
+              <p><strong>Description:</strong> <span id="detailDesc"></span></p>
+              <p><strong>Hardware Sets:</strong> <span id="detailHardwareSummary"></span></p>
+              <p><strong>Checked Out:</strong> <span id="detailChecked"></span></p>
+
+              <button id="hardwarePopupBtn" type="button" class="sub-button">
+                Show Hardware Sets
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <button id="accessBtn" type="button">Access Project</button>
-      <div id="accessMessage" class="message"></div>
-
-      <div id="projectDetails" class="project-details" style="display:none;">
-        <p><strong>Project Name:</strong> <span id="detailName"></span></p>
-        <p><strong>Description:</strong> <span id="detailDesc"></span></p>
-        <p><strong>Hardware Sets:</strong> <span id="detailHardwareSummary"></span></p>
-        <p><strong>Checked Out:</strong> <span id="detailChecked"></span></p>
-
-        <button id="hardwarePopupBtn" type="button" class="sub-button">
-          Show Hardware Sets
-        </button>
-      </div>
-<<<<<<< HEAD
->>>>>>> parent of 66954b3 (widen)
-=======
->>>>>>> parent of 66954b3 (widen)
     </div>
   </div>
 
 <script>
+  const globalMessage = document.getElementById('globalMessage');
   const createMessage = document.getElementById('createMessage');
   const accessMessage = document.getElementById('accessMessage');
+
+  const createBtn = document.getElementById('createBtn');
+  const accessBtn = document.getElementById('accessBtn');
+  const hardwarePopupBtn = document.getElementById('hardwarePopupBtn');
+
   const projectDetailsDiv = document.getElementById('projectDetails');
   const detailName = document.getElementById('detailName');
   const detailDesc = document.getElementById('detailDesc');
   const detailHardwareSummary = document.getElementById('detailHardwareSummary');
   const detailChecked = document.getElementById('detailChecked');
-  const currentStateEl = document.getElementById('currentState');
-  const currentCatEl = document.getElementById('currentCategory');
-  const show = (el, text, kind) => { el.textContent = text; el.className = 'message ' + kind; el.style.display='block'; };
-  const hide = (el) => { el.style.display = 'none'; };
 
-  // Create Project (with Dewey auto-fill display)
-  document.getElementById('createBtn').addEventListener('click', async () => {
-    hide(createMessage);
-    hide(document.getElementById('autoFillNotice'));
+  let currentHardwareSets = [];
+
+  function showMessage(el, text, type) {
+    el.textContent = text;
+    el.className = 'message ' + type;
+    el.style.display = 'block';
+  }
+  function hideMessage(el) {
+    el.style.display = 'none';
+  }
+
+  // ===== CREATE PROJECT =====
+  createBtn.addEventListener('click', async () => {
+    hideMessage(createMessage);
+    hideMessage(globalMessage);
+
     const project_id = document.getElementById('newProjectId').value.trim();
     const project_name = document.getElementById('newProjectName').value.trim();
     const project_desc = document.getElementById('newProjectDesc').value.trim();
-    const target_state = document.getElementById('newTargetState').value;
-    const target_category = document.getElementById('newTargetCategory').value.trim();
 
     if (!project_id || !project_name) {
-      show(createMessage, 'Project ID and Project Name are required.', 'error');
+      showMessage(createMessage, 'Project ID and Project Name are required.', 'error');
       return;
     }
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-=======
->>>>>>> parent of 66954b3 (widen)
-    const payload = {
-      project_id,
-      project_name,
-      project_desc
-    };
+    const payload = { project_id, project_name, project_desc };
 
->>>>>>> parent of 66954b3 (widen)
     try {
       const resp = await fetch('/projects', {
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ project_id, project_name, project_desc })
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
       });
       const data = await resp.json();
-      if (!resp.ok || !data.success) return show(createMessage, data.message || 'Failed to create project.', 'error');
 
-      const created = data.project || {};
-      currentStateEl.value = created.target_state || target_state || '';
-      currentCatEl.value = created.target_category || target_category || '';
-
-      // Update visible inputs if backend enriched from Dewey
-      document.getElementById('newTargetState').value = currentStateEl.value;
-      document.getElementById('newTargetCategory').value = currentCatEl.value;
-
-      show(createMessage, 'Project created successfully.', 'success');
-      document.getElementById('accessProjectId').value = project_id;
-
-      // Optional: show Dewey auto-fill notice
-      if (created.target_state || created.target_category) {
-        const msg = `Auto-filled from Dewey Data: ${created.target_category || ''} in ${created.target_state || ''}`;
-        show(document.getElementById('autoFillNotice'), msg.trim(), 'success');
+      if (!resp.ok || !data.success) {
+        showMessage(createMessage, data.message || 'Failed to create project.', 'error');
+        return;
       }
 
-    } catch (e) { show(createMessage, 'Error calling /projects.', 'error'); }
+      showMessage(createMessage, 'Project created successfully.', 'success');
+
+    } catch (err) {
+      console.error(err);
+      showMessage(createMessage, 'Error calling /projects (create).', 'error');
+    }
   });
 
-  // Access Project
-  document.getElementById('accessBtn').addEventListener('click', async () => {
-    hide(accessMessage);
+  // ===== ACCESS PROJECT =====
+  accessBtn.addEventListener('click', async () => {
+    hideMessage(accessMessage);
+    hideMessage(globalMessage);
     projectDetailsDiv.style.display = 'none';
+    currentHardwareSets = [];
+
     const project_id = document.getElementById('accessProjectId').value.trim();
-    if (!project_id) return show(accessMessage, 'Please enter a Project ID.', 'error');
+    if (!project_id) {
+      showMessage(accessMessage, 'Please enter a Project ID.', 'error');
+      return;
+    }
 
     try {
       const resp = await fetch(`/projects/${encodeURIComponent(project_id)}`);
       const data = await resp.json();
-      if (!resp.ok || !data.success) return show(accessMessage, data.message || 'Project not found.', 'error');
+
+      if (!resp.ok || !data.success) {
+        showMessage(accessMessage, data.message || 'Project not found.', 'error');
+        return;
+      }
 
       const p = data.project || {};
+
       detailName.textContent = p.project_name || '';
       detailDesc.textContent = p.project_desc || '';
-<<<<<<< HEAD
-      const sets = Array.isArray(p.hardware_set_id) ? p.hardware_set_id : (p.hardware_set_id ? [String(p.hardware_set_id)] : []);
-      detailHardwareSummary.textContent = sets.length ? sets.join(', ') : 'No hardware sets available';
-      const n = typeof p.num_of_hardware_sets === 'number' ? p.num_of_hardware_sets : parseInt(p.num_of_hardware_sets || '0',10)||0;
-      detailChecked.textContent = n;
-      projectDetailsDiv.style.display='block';
-    } catch { show(accessMessage, 'Error calling /projects.', 'error'); }
-=======
 
-      // hardware_set_id may be array or string
       currentHardwareSets = Array.isArray(p.hardware_set_id)
         ? p.hardware_set_id
         : (p.hardware_set_id ? [String(p.hardware_set_id)] : []);
@@ -387,27 +441,15 @@
       console.error(err);
       showMessage(accessMessage, 'Error calling /projects (get).', 'error');
     }
->>>>>>> parent of 66954b3 (widen)
   });
 
-  // Hardware popup
-  document.getElementById('hardwarePopupBtn')?.addEventListener('click', () => {
-    const text = detailHardwareSummary.textContent || '';
-    if (!text || text === 'No hardware sets available') alert('No hardware sets associated with this project.');
-    else alert('Hardware sets for this project:\n\n' + text);
-  });
-
-  // Open Top Brands auto-filtered
-  document.getElementById('openTopBrandsBtn').addEventListener('click', () => {
-    const project_id = document.getElementById('accessProjectId').value.trim()
-                      || document.getElementById('newProjectId').value.trim();
-    const state = (currentStateEl.value || document.getElementById('newTargetState').value || '').trim();
-    const category = (currentCatEl.value || document.getElementById('newTargetCategory').value || '').trim();
-    const params = new URLSearchParams();
-    if (project_id) params.set('project_id', project_id);
-    if (state) params.set('state', state);
-    if (category) params.set('category', category);
-    window.location.href = '/top10companies' + (params.toString() ? ('?' + params.toString()) : '');
+  // ===== HARDWARE POPUP =====
+  hardwarePopupBtn.addEventListener('click', () => {
+    if (!currentHardwareSets || currentHardwareSets.length === 0) {
+      alert('No hardware sets associated with this project.');
+    } else {
+      alert('Hardware sets for this project:\n\n' + currentHardwareSets.join(', '));
+    }
   });
 </script>
 </body>
