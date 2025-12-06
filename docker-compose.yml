@@ -1,44 +1,32 @@
-services:
-  # MongoDB for Projects Service
-  mongo-projects:
-    image: mongo:6.0
-    container_name: mongo-projects
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
-      MONGO_INITDB_DATABASE: ${MONGO_DB}
-    ports:
-      - "27018:27017"
-    volumes:
-      - projects-mongo-data:/data/db
-    networks:
-      - projects-network
+version: '3.9'
 
-  # Flask Projects Service
-  projects-service:
-    build: .
-    container_name: projects-service
-    depends_on:
-      - mongo-projects
+services:
+  mongo-auth:
+    image: mongo:6.0
+    container_name: mongo-auth
+    restart: always
     environment:
-      PORT: ${PORT}
-      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
-      MONGO_HOST: mongo-projects
-      MONGO_PORT: ${MONGO_PORT}
-      MONGO_DB: ${MONGO_DB}
-      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
-      MONGO_AUTHSOURCE: ${MONGO_AUTHSOURCE}
-      CORS_ORIGINS: ${CORS_ORIGINS}
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: securepassword123
+      MONGO_INITDB_DATABASE: haasappprojectsdb
     ports:
-      - "${PORT}:${PORT}"
-    networks:
-      - projects-network
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+
+  flask-app:
+    build: .
+    container_name: projects-microservice
+    restart: always
+    ports:
+      - "2000:2000"
+    env_file:
+      - .env
+    depends_on:
+      - mongo-auth
+    environment:
+      - FLASK_ENV=production
+      - PORT=2000
 
 volumes:
-  projects-mongo-data:
-
-networks:
-  projects-network:
-    driver: bridge
-
+  mongo-data:
