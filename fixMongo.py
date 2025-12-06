@@ -2,7 +2,7 @@ from pymongo import MongoClient, ASCENDING
 
 MONGO_URI = "mongodb+srv://haas:haaspassword@haas-app-cluster.p0wa0nu.mongodb.net/"
 client = MongoClient(MONGO_URI)
-db = client["haasappusersdb"]
+db = client["haasappprojectsdb"]
 users = db["users"]
 
 print("Step 1: Checking existing indexes...")
