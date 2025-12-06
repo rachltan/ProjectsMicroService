@@ -86,11 +86,14 @@ def create_app():
                 "project": project_doc
             })
         except Exception as e:
-            print(f"⚠️ Error creating project: {e}")
+            import traceback
+            print("⚠️ Error creating project:", e)
+            traceback.print_exc()
             return jsonify({
                 "success": False,
-                "message": "Error creating project."
+                "message": f"Error creating project: {str(e)}"
             }), 500
+
 
     # ----------------------------------------
     # ROUTE: Get Project by ID
